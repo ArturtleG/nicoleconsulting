@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1200" viewBox="0 0 1200 1200">
+  <!-- Circular border -->
+  <circle cx="600" cy="600" r="580" fill="none" stroke="#ffffff" stroke-width="40"/>
+  <!-- Overlapping monogram letters N and M -->
+  <text x="520" y="750" font-family="Cedarville Cursive, cursive" font-size="700" fill="#ffffff" letter-spacing="-50">N</text>
+  <text x="580" y="725" font-family="Cedarville Cursive, cursive" font-size="700" fill="#ffffff" letter-spacing="-50">M</text>
+</svg>
