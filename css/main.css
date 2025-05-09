@@ -224,13 +224,6 @@ html {
   /*--------------------------------------------------------------
   7. ABOUT & EVOLUTION SECTIONS
   --------------------------------------------------------------*/
-  #about {
-    
-  }
-  
-  #evolution_learning {
-    /* inherits section setup */
-  }
   
   #evolution_parts {
     display: grid;
