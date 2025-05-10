@@ -339,3 +339,9 @@ footer .logo{
         scroll-margin-top: 220px;
     }
 }
+
+@media(max-width: 400px){
+    .hero::before {
+        width: 30px;
+    }
+}
