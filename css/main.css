@@ -329,6 +329,9 @@ footer .logo{
         gap: 1rem;
         height: 220px;
     }
+    .hero::before {
+        width: 40px;
+    }
     body{
         padding-top: 220px;
     }
