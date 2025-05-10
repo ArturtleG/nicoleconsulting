@@ -328,4 +328,10 @@ footer .logo{
         flex-direction: column;
         gap: 1rem;
     }
+    body{
+        padding-top: 220px;
+    }
+    section{
+        scroll-margin-top: 220px;
+    }
 }
