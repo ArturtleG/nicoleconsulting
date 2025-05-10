@@ -327,6 +327,7 @@ footer .logo{
     #top_menu{
         flex-direction: column;
         gap: 1rem;
+        height: 220px;
     }
     body{
         padding-top: 220px;
