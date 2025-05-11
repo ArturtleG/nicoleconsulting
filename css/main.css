@@ -235,12 +235,6 @@ html {
     object-fit: cover;
     z-index: 1;
 }
-
-.mobile .hero-background{
-    position: relative;
-    max-width: 100%;
-    max-height: 100%;
-}
   
 .hero-text {
     position: absolute;
@@ -376,12 +370,6 @@ footer .logo{
     section{
         scroll-margin-top: 220px;
     }
-}
-
-@media(max-width: 450px){
-    .hero::before {
-        width: 30px;
-    }
 
     .desktop{
         display: none;
@@ -389,5 +377,24 @@ footer .logo{
 
     .mobile{
         display: block;
+    }
+
+    .hero-background{
+        position: relative;
+        max-width: 50%;
+        max-height: 50%;
+        display: block;
+        margin: 0 auto;
+    }
+}
+
+@media(max-width: 450px){
+    .hero::before {
+        width: 30px;
+    }
+
+    .hero-background{
+        max-width: 100%;
+        max-height: 100%;
     }
 }
