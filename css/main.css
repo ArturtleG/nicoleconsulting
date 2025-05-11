@@ -56,6 +56,14 @@ html {
   .u-flex-center { display: flex; justify-content: center; align-items: center; }
   .u-flex-wrap   { flex-wrap: wrap; }
   
+.desktop{
+    display: block;
+}
+
+.mobile{
+    display: none;
+}
+
   /*--------------------------------------------------------------
   3. FIXED HEADER & NAV
   --------------------------------------------------------------*/
@@ -180,14 +188,18 @@ html {
   /*--------------------------------------------------------------
   6. HERO
   --------------------------------------------------------------*/
-  .hero {
+.hero {
     position: relative;
     overflow: hidden;
     position: relative;
     height: calc(100vh - var(--header-height));
     overflow: hidden;
     z-index: 0;
-  }
+}
+
+.hero.mobile{
+    height: auto;
+}
   
 .hero::before {
     content: '';
@@ -223,6 +235,12 @@ html {
     object-fit: cover;
     z-index: 1;
 }
+
+.mobile .hero-background{
+    position: relative;
+    max-width: 100%;
+    max-height: 100%;
+}
   
 .hero-text {
     position: absolute;
@@ -235,6 +253,14 @@ html {
     background-color: rgba(255, 255, 255, 0.9);
     border-radius: 8px;
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+.mobile .hero-text{
+    position: relative;
+    top: 0;
+    left:0;
+    max-width: 100%;
+    margin-top: 2rem;
 }
   
   /*--------------------------------------------------------------
@@ -355,5 +381,13 @@ footer .logo{
 @media(max-width: 450px){
     .hero::before {
         width: 30px;
+    }
+
+    .desktop{
+        display: none;
+    }
+
+    .mobile{
+        display: block;
     }
 }
