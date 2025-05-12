@@ -54,7 +54,9 @@ html {
     margin: 20px auto;
   }
   .u-flex-center { display: flex; justify-content: center; align-items: center; }
+  .u-flex-right { display: flex; justify-content: right; align-items: center; }
   .u-flex-wrap   { flex-wrap: wrap; }
+  .u-flex-column { display: flex; flex-direction: column; }
   
 .desktop{
     display: block;
@@ -127,6 +129,7 @@ html {
   h1 {
     font-size: clamp(1.75rem, 6vw, 2.75rem);
     color: var(--color-primary);
+    margin-bottom: .5rem;
   }
   
   h2 {
@@ -139,6 +142,10 @@ html {
     font-family: 'Glass Antiqua', cursive;
     font-size: clamp(1.75rem, 4vw, 2rem);
     margin-bottom: 1rem;
+  }
+
+  h4{
+    font-size: clamp(1.3rem, 3vw, 1.75rem);
   }
   
   p {
@@ -158,6 +165,7 @@ html {
     border-radius: 4px;
     font-weight: 600;
     cursor: pointer;
+    font-size: 1rem;
   }
   
   /*--------------------------------------------------------------
@@ -259,11 +267,14 @@ html {
     max-width: 100%;
     margin-top: 2rem;
 }
-  
   /*--------------------------------------------------------------
   7. ABOUT & EVOLUTION SECTIONS
   --------------------------------------------------------------*/
-  
+ #about .u-flex-column {
+    gap: 2rem;
+  } 
+
+
   #evolution_parts {
     display: grid;
     grid-template-columns: 1fr;
@@ -307,10 +318,15 @@ html {
     padding: 2rem;
   }
 
-.endorsement{
+.primary{
     background-color: var(--color-primary);
     padding: 10px;
     border-radius: 10px;
+    color: white !important;
+}
+
+.primary h1{
+    color: white !important;
 }
 
 .endorsement_author{
@@ -318,6 +334,7 @@ html {
     font-family: "Courier Prime", monospace;
     font-family: "Glass Antiqua", cursive;
     font-family: "Quicksand", sans-serif;
+    text-align: right;
 }
 
   .blob{
@@ -398,7 +415,7 @@ footer .logo{
     display: flex;
     justify-content: center;
     align-items: center;
-    min-width: 200px;
+    min-width: 230px;
     gap:4px;
     background-color: var(--color-primary);
     padding: 2px 5px;
@@ -429,6 +446,10 @@ footer .logo{
     z-index: 9999 !important; /* temporarily force it to the front */
 }
 
+#modal_wrapper form{
+    max-height: 80vh;
+}
+
 #modal_wrapper form, #modal_message{
     background-color: white;
     padding: 2rem;
@@ -437,26 +458,34 @@ footer .logo{
     max-width: 90%;
 }
 
+#modal_wrapper form label{
+    font-family: "Glass Antiqua", cursive;
+    font-size: 1.2rem;
+    margin-bottom: 1rem;
+    font-weight: 900;
+}
+
 #modal_wrapper form input, #modal_wrapper form textarea{
     width: 100%;
     padding: 1rem;
     border-radius: 10px;
     border: 1px solid var(--color-primary);
     margin-bottom: 1rem;
+    font-family: "Quicksand", sans-serif;
+    font-size: 1rem;
 }
 
 #modal_wrapper form textarea{
-    height: 60vh;
+    height: 40vh;
 }
 
-#modal_wrapper form button{
-    float: right;
-    margin-left: 1rem;
+#modal_wrapper #form_button_wrapper{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 2rem;
 }
 
-.modal_close{
-    float: right;
-}
 
 .no_display{
     display: none !important;
@@ -492,6 +521,13 @@ footer .logo{
         max-height: 50%;
         display: block;
         margin: 0 auto;
+    }
+}
+
+@media(max-width:900px){
+    #services_list .blob{
+        max-width: none !important;
+        width: 100% !important;
     }
 }
 
