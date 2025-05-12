@@ -3,9 +3,10 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Nicole McCree Consulting</title>
+  <title>Nicole McRee Consulting</title>
   <link rel="icon" type="image/x-icon" href="images/Initials.svg">
-  <link rel="stylesheet" href="css/main.css?v=1.0.6" />
+  <link rel="stylesheet" href="css/main.css?v=1.0.12" />
+  <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 </head>
 <body>
   <!-- fixed header -->
@@ -15,14 +16,15 @@
     </div>
     <nav aria-label="Main navigation">
       <ul>
-        <li><a href="#about">About Nicole</a></li>
-        <li><a href="#evolution_learning">Evolution of Learning</a></li>
         <li><a href="#services">Services</a></li>
-        <li><a href="#testimonials">Testimonials</a></li>
+        <li><a href="#about">About Nicole</a></li>
+        <!--<li><a href="#evolution_learning">Evolution of Learning</a></li>-->
+        <li><a href="#testimonials">Endorsements</a></li>
         <li><a href="#resources">Resources</a></li>
+        <li><a href="#footer">Contact</a></li>
       </ul>
     </nav>
-    <a href="#" class="cta-button">Let's Work Together</a>
+    <!--<a href="mailto:nicole@mcree-ed.consulting" class="cta-button">nicole@mcree-ed.consulting</a>-->
   </header>
 
   <main>
@@ -31,18 +33,18 @@
         <div id="hero-wrapper">
             <img class="hero-background" src="images/nicoleSplash2_.png" alt="Portrait of Nicole McCree"/>
             <div class="hero-text">
-                <h1>Hi, I'm Nicole.</h1>
-                    <p>
-                        I help schools unlock the power of equity and creativity in education.
-                        With decades of experience as a science teacher and coach, I partner
-                        with educators to build joyful, inclusive, and engaging learning
-                        spaces. Whether you're rethinking your curriculum, leading professional
-                        learning, or transforming school culture, I'm here to help.
-                    </p>
-                    <a href="#" class="primary-button">
-                        Let's Transform Learning Together
-                    </a>
-            </div>
+                <h1>Hi… I'm Nicole:</h1>
+                <p>
+                    I help educators unlock their power to cultivate student learning that is deep, 
+                    creative, and centered in equity. With decades of experience as a science teacher, 
+                    instructional coach, and curriculum specialist, I partner with schools and leaders 
+                    to build truly engaging learning environments. Whether you're rethinking your 
+                    curriculum, leading professional learning, or transforming school culture into a 
+                    thriving PLC, I'm here to help.
+                </p>
+                <div id="contact_button" class="primary-button">
+                    Let's Transform Learning Together
+                </div>
         </div>
     </section>
 
@@ -52,53 +54,131 @@
         <div class="row">
             <img class="hero-background" src="images/portraitCircle.png" alt="Portrait of Nicole McCree"/>
             <div class="hero-text">
-                <h1>Hi, I'm Nicole.</h1>
-                    <p>
-                        I help schools unlock the power of equity and creativity in education.
-                        With decades of experience as a science teacher and coach, I partner
-                        with educators to build joyful, inclusive, and engaging learning
-                        spaces. Whether you're rethinking your curriculum, leading professional
-                        learning, or transforming school culture, I'm here to help.
-                    </p>
-                    <a href="#" class="primary-button">
-                        Let's Transform Learning Together
-                    </a>
+                <h1>Hi… I'm Nicole:</h1>
+                <p>
+                    I help educators unlock their power to cultivate student learning that is deep, 
+                    creative, and centered in equity. With decades of experience as a science teacher, 
+                    instructional coach, and curriculum specialist, I partner with schools and leaders 
+                    to build truly engaging learning environments. Whether you're rethinking your 
+                    curriculum, leading professional learning, or transforming school culture into a 
+                    thriving PLC, I'm here to help.
+                </p>
+                <a href="#" class="primary-button">
+                    Let's Transform Learning Together
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- services -->
+    <section id="services"  class="dark">
+        <div class="row">
+            <h2>Services</h2>
+        </div>
+        <div id="services_text" class="row flex_center_center flex_wrap">
+            <p>
+            I offer a range of services designed to support educators and schools in their journey 
+            towards equity and creativity in education. From coaching to professional learning, 
+            I am here to help you unlock the potential of your learning environment.
+            </p>
+        </div>
+        <div id="services_list" class="row flex_center_center flex_wrap">
+            <div class="blob white_transparent">
+                <img src="images/Initials.svg" alt="Nicole McCree initials logo"/>
+                <h1>Workshops</h1>
+                <p>Interactive workshops that inspire creativity and collaboration among educators.</p>
+            </div>
+            <div class="blob white_transparent">
+                <img src="images/Initials.svg" alt="Nicole McCree initials logo"/>
+                <h1>Coaching</h1>
+                <p>Partnering with educators to create inclusive and engaging learning environments.</p>
+            </div>
+            <div class="blob white_transparent">
+                <img src="images/Initials.svg" alt="Nicole McCree initials logo"/>
+                <h1>Professional Learning</h1>
+                <p>Tailored workshops and training sessions to enhance teaching practices.</p>
+            </div>
+            <div class="blob white_transparent">
+                <img src="images/Initials.svg" alt="Nicole McCree initials logo"/>
+                <h1>Consulting</h1>
+                <p>Expert guidance on curriculum development and school culture transformation.</p>
+            </div>
+        </div>
+        <div id="services_options" class="row">
+            <div class="blob white_transparent">
+                <h1>Options</h1>
+                <ul>
+                    <li>One hour keynote/staff meeting</li>
+                    <li>Full day</li>
+                    <li>Half day</li>
+                    <li>Monthly or bimonthly cycles</li>
+                        
+                </ul>
+            </div>
+            <div class="blob white_transparent">
+                <h1>Topics</h1>
+                <ul>
+                    <li>PLC foundations and practices</li>
+                    <li>Mindset
+                        <ul>
+                            <li>
+                                Transforming how science is taught means more than just updating lesson plans, it 
+                                requires a fundamental shift in mindset. Helping educators move from traditional, 
+                                content-heavy instruction to more modern, inquiry-driven practices is essential to 
+                                creating a classroom culture that reflects the evolving nature of science itself. 
+                                With a focus on equipping teachers with a clear understanding of why change is 
+                                necessary, grounding the shift in real-world relevance, scientific literacy, and 
+                                the skills students need to navigate a rapidly advancing, data-rich world. Done 
+                                effectively, educators can embrace innovation and curiosity, inspire the next 
+                                generation of thinkers, problem-solvers, and lifelong learners.
+                            </li>
+                        </ul>
+                    </li>
+                    <li>Science resource and standard alignment K-8, K-5, or 6-8
+                        <ul>
+                            <li>In standards based systems</li>
+                            <li>In traditional systems</li>
+                        </ul>
+                    </li>
+                    <li>In depth experience of OpenSciEd and assessment creation</li>
+                    <li>Aligning assessments & learning to the 3 dimensional NGSS expectations to prepare learners for the ISA</li>
+                    <li>Content literacy strategies and practices (w/a focus on knowledge building)</li>
+                    <li>STEM integration to content standards</li>
+                    <li>AI integration and possibilities!</li> 
+                </ul>
             </div>
         </div>
     </section>
 
     <!-- about -->
-    <section id="about"  class="dark">
+    <section id="about">
         <div class="row"><h2>About Nicole</h2></div>
         <div id="about_text" class="row">
             <p>
-            I am a passionate educator with a deep commitment to equity and
-            creativity in education. My journey has taken me from the classroom to
-            coaching, and now I am dedicated to partnering with schools to create
-            inclusive and engaging learning environments.
+                I'm a passionate educator who believes all students deserve 
+                learning experiences that are meaningful. Over the past 20 years, 
+                I've worn many hats, yet in every role, I've stayed focused on what 
+                matters most: helping students think deeply, wonder freely, and 
+                feel seen in their learning.
             </p>
             <p>
-            With a background in science education and years of experience, I
-            understand the challenges educators face. I believe every student
-            deserves access to high-quality education that inspires curiosity and
-            fosters a love for learning.
+                I know how challenging and rewarding this work can be. That's why 
+                I partner with schools and educators to design practical, engaging, 
+                and inclusive solutions; whether that means reimagining curriculum, 
+                strengthening PLC practices, or leading transformative professional 
+                learning. My style is collaborative, responsive, and grounded in the 
+                realities of the classroom. Together, we can create learning 
+                experiences that are not only rigorous but also joyful.
             </p>
             <p>
-            My approach is rooted in collaboration, creativity, and a commitment to
-            equity. I work closely with educators to develop tailored solutions
-            that meet the unique needs of their students and communities. Together,
-            we can create learning experiences that are not only rigorous but also
-            joyful and inclusive.
-            </p>
-            <p>
-            I am excited to partner with you on this journey. Let's unlock the
-            power of equity and creativity in education together!
+                I'm here to help you create teaching and learning where both students 
+                and teachers can thrive. Let's build something great…. Together!
             </p>
         </div>
     </section>
 
     <!-- evolution of learning -->
-    <section id="evolution_learning">
+    <!--<section id="evolution_learning">
         <div class="row"><h2>Evolution of Learning</h2></div>
         <div id="evolution_text" class="row">
         <p>
@@ -143,60 +223,24 @@
           <p>Let's connect! I would love to speak with you!</p>
         </div>
       </div>
-    </section>
+    </section>-->
 
-    <section id="services"  class="dark">
+    <section id="testimonials" class="dark">
         <div class="row">
-            <h2>Services</h2>
-        </div>
-        <div id="services_text" class="row flex_center_center flex_wrap">
-            <p>
-            I offer a range of services designed to support educators and schools in their journey 
-            towards equity and creativity in education. From coaching to professional development, 
-            I am here to help you unlock the potential of your learning environment.
-            </p>
-        </div>
-        <div id="services_list" class="row flex_center_center flex_wrap">
-            <div class="blob white_transparent">
-                <img src="images/Initials.svg" alt="Nicole McCree initials logo"/>
-                <h1>Coaching</h1>
-                <p>Partnering with educators to create inclusive and engaging learning environments.</p>
-            </div>
-            <div class="blob white_transparent"">
-                <img src="images/Initials.svg" alt="Nicole McCree initials logo"/>
-                <h1>Professional Development</h1>
-                <p>Tailored workshops and training sessions to enhance teaching practices.</p>
-            </div>
-            <div class="blob white_transparent"">
-                <img src="images/Initials.svg" alt="Nicole McCree initials logo"/>
-                <h1>Workshops</h1>
-                <p>Interactive workshops that inspire creativity and collaboration among educators.</p>
-            </div>
-            <div class="blob white_transparent"">
-                <img src="images/Initials.svg" alt="Nicole McCree initials logo"/>
-                <h1>Consulting</h1>
-                <p>Expert guidance on curriculum development and school culture transformation.</p>
-            </div>
-        </div>
-    </section>
-
-    <section id="testimonials">
-        <div class="row">
-            <h2>Testimonials</h2>
+            <h2>Endorsements</h2>
         </div>
         <div id="testimonials_text" class="row flex_center_center flex_wrap">
-            <p>
-            "Nicole's coaching has transformed my teaching practice. Her insights and strategies 
-            have helped me create a more inclusive and engaging classroom environment."
-            </p>
-            <p>
-            "Working with Nicole has been a game-changer for our school. Her approach to equity 
-            and creativity in education has inspired our entire staff."
+            <p class="endorsement">
+                "Without Nicole, my entire grade-level-team's lessons - especially in science - 
+                would not be as engaging, reflective, or impactful as they are. Her flexibility, 
+                willingness to collaborate, and depth of knowledge on professional development and 
+                teaching strategies, has further advanced our instruction and the learning for all 
+                of our students." <div class="endorsement_author">- Teacher (Grayslake District #46)</div>
             </p>
         </div>
     </section>
 
-    <section id="resources" class="dark">
+    <section id="resources">
         <div class="row">
             <h2>Resources</h2>
         </div>
@@ -208,20 +252,105 @@
             </p>
         </div>
         <div id="resources_list">
-            <a href="#" class="primary-button">Article 1</a>
-            <a href="#" class="primary-button">Workshop 1</a>
-            <a href="#" class="primary-button">Article 2</a>
-            <a href="#" class="primary-button">Workshop 2</a>
+            <a href="#" class="primary-button">Articles - COMING SOON!</a>
+            <a href="#" class="primary-button">Workshops - COMING SOON!</a>
         </div>
     </section>
     <div id="social">
         <a href="https://www.linkedin.com/in/nicole-mcree-252960320/" target="_blank"><img src="images/linkedIn.svg"/></a>
         <a href="https://x.com/NicoleMcBado/" target="_blank"><img src="images/x.svg"/></a>
     </div>
-    <footer>
-        <img class="logo" src="images/Initials.svg" alt="Nicole McCree initials logo"/>
-        <div>&copy; 2025 Nicole McCree Consulting. All rights reserved.</div>
+    <footer id="footer">
+        <div id="logo_wrapper">
+            <img class="logo" src="images/Initials.svg" alt="Nicole McRree initials logo"/>
+            <div>&copy; 2025 Nicole McRee Consulting. All rights reserved.</div>
+        </div>
+        <div id="footer_email">
+            <img class="emailIcon" src="images/emailIconW.svg" alt="email icon"/>
+            <a href="mailto:nicole@mcree-ed.consulting">nicole@mcree-ed.consulting</a>
+        </div>
     </footer>
+    <div id="modal_wrapper" class="no_display">
+        <form action="https://formspree.io/f/mnndgnqz" method="POST">
+            <label>
+                Your email:
+                <input type="email" name="email">
+            </label>
+            <label>
+                Your message:
+                <textarea name="message"></textarea>
+            </label>
+            <!-- your other form fields go here -->
+            <button type="submit" class="cta-button">Submit</button>
+            <div class="cta-button modal_close">Close</div>
+        </form>
+        <div id="modal_message" class="no_display">
+            <h2>Thank you for your message!</h2>
+            <p>I will get back to you as soon as possible.</p>
+            <div class="cta-button modal_close">Close</div>
+        </div>
+    </div>
+    </div>
   </main>
+  <script>
+    $(document).ready(function () {
+      // Show the modal when the button is clicked
+      $("#contact_button").click(function (e) {
+        //e.preventDefault(); // Prevent default anchor click behavior
+        //$("#modal_wrapper").css("display", "flex"); // Show the modal
+        $("#modal_wrapper").removeClass("no_display"); // Show the modal
+        $("#modal_wrapper form").removeClass("no_display"); // Show the modal
+        $("#modal_message").addClass("no_display"); // Hide the modal message
+      });
+  
+      /*// Hide the modal when clicking outside of it
+      $(document).mouseup(function (e) {
+        var modal = $("#modal_wrapper");
+        if (!modal.is(e.target) && modal.has(e.target).length === 0) {
+          modal.fadeOut(); // Hide the modal
+        }
+      });*/
+
+      $(".modal_close").click(function (e) {
+        console.log("close button clicked");
+        //e.preventDefault(); // Prevent default anchor click behavior
+        $("#modal_wrapper").addClass("no_display"); // Hide the modal
+      });
+    });
+
+    document.addEventListener("DOMContentLoaded", function () {
+      const form = document.querySelector("#modal_wrapper form");
+  
+      form.addEventListener("submit", function (e) {
+        e.preventDefault(); // stop default form submission so we can handle it manually
+  
+        const formData = new FormData(form);
+  
+        fetch(form.action, {
+          method: form.method,
+          body: formData,
+          headers: {
+            'Accept': 'application/json'
+          }
+        }).then(response => {
+          if (response.ok) {
+            //document.getElementById("modal_wrapper").style.display = "none";
+            /*$("form").html("Thank you! Your message has been sent.");
+            setTimeout(() => {
+              $("#modal_wrapper").fadeOut();
+            }, 2000);
+            */
+            $("#modal_message").removeClass("no_display");
+            $("#modal_wrapper form").addClass("no_display");
+            form.reset();
+          } else {
+            alert("There was a problem submitting the form. Please try again.");
+          }
+        }).catch(error => {
+          alert("There was a problem submitting the form.");
+        });
+      });
+    });
+  </script>
 </body>
 </html>
