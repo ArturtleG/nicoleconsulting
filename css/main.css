@@ -327,7 +327,6 @@ hr {
 
 .primary{
     background-color: var(--color-primary);
-    padding: 10px;
     border-radius: 10px;
     color: white !important;
 }
@@ -338,15 +337,16 @@ hr {
 
 .endorsement_author{
     font-weight: 900;
-    font-family: "Courier Prime", monospace;
-    font-family: "Glass Antiqua", cursive;
     font-family: "Quicksand", sans-serif;
     text-align: right;
+    font-size: 1rem;
 }
 
   .blob{
     padding: 2rem;
     border-radius: 10px;
+    font-size: clamp(1.2rem, 2.5vw, 1.4rem);
+    line-height: clamp(1.4rem, 2.6vw ,1.6rem);
   }
 
   .blob img{
@@ -549,6 +549,10 @@ footer .logo{
     .hero-background{
         max-width: 100%;
         max-height: 100%;
+    }
+
+    .blob{
+        padding: 1rem;
     }
 }
 
