@@ -355,9 +355,18 @@ hr {
     margin: 0 auto;
   }
 
-  .blob ul{
+.blob .title{
+    font-size: clamp(2.5rem, 6vw, 3rem);
+    line-height: clamp(2rem, 5.5vw, 2.5rem);
+    color: var(--color-primary);
+    margin: .5rem 0 1rem 0;
+    text-align: center;
+    font-weight: 900;
+}
+
+.blob ul{
     margin-bottom: 1rem;
-  }
+}
 
   .blob li{
     font-size: clamp(1.2rem, 2vw, 1.4rem);
