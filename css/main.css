@@ -584,7 +584,7 @@ footer .logo{
     }
 }
 
-@media(max-width: 1000px){
+@media(max-width: 1200px){
     #services_options{
         display: grid;
         gap: 1rem;
