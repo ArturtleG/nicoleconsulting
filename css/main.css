@@ -64,6 +64,8 @@ hr {
   .u-flex-right { display: flex; justify-content: right; align-items: center; }
   .u-flex-wrap   { flex-wrap: wrap; }
   .u-flex-column { display: flex; flex-direction: column; }
+  .u-flex-wrap {display: flex; flex-wrap: wrap; gap: 1rem;}
+  .u-3-cols { flex: 1 1 calc(33.333% - 1rem); min-width: 250px; }
   
 .desktop{
     display: block;
@@ -275,37 +277,11 @@ hr {
     margin-top: 2rem;
 }
   /*--------------------------------------------------------------
-  7. ABOUT & EVOLUTION SECTIONS
+  7. ABOUT
   --------------------------------------------------------------*/
  #about .u-flex-column {
     gap: 2rem;
   } 
-
-
-  #evolution_parts {
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: 1rem;
-  }
-  
-  #evolution_parts > div {
-    background: var(--color-evolution-bg);
-    color: white;
-    border-radius: 10px;
-    padding: 1.5rem;
-  }
-
-  #services_list, #accolades{
-    display: flex;
-    gap: 4rem;
-    justify-content: center;
-    flex-wrap: wrap;
-  }
-
-  #services_list .blob, #accolades .blob{
-    max-width: 25%;
-    min-width: 300px;
-  }
 
   #services_list .blob h1{
     text-align: center;
