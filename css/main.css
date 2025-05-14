@@ -134,7 +134,7 @@ hr {
   4. TYPOGRAPHY
   --------------------------------------------------------------*/
   h1 {
-    font-size: clamp(1.75rem, 6vw, 2.75rem);
+    font-size: clamp(1.75rem, 6vw, 2.7rem);
     color: var(--color-primary);
     margin-bottom: .5rem;
   }
@@ -295,14 +295,14 @@ hr {
     padding: 1.5rem;
   }
 
-  #services_list{
+  #services_list, #accolades{
     display: flex;
     gap: 4rem;
     justify-content: center;
     flex-wrap: wrap;
   }
 
-  #services_list .blob{
+  #services_list .blob, #accolades .blob{
     max-width: 25%;
     min-width: 300px;
   }
@@ -351,13 +351,15 @@ hr {
 
   .blob img{
     display: block;
-    height: 200px;
+    max-height: 200px;
+    max-width: 250px;
     margin: 0 auto;
+    border-radius: 10px;
   }
 
 .blob .title{
-    font-size: clamp(2.5rem, 6vw, 3rem);
-    line-height: clamp(2rem, 5.5vw, 2.5rem);
+    font-size: clamp(2.5rem, 6vw, 2.7rem);
+    line-height: clamp(2rem, 5.5vw, 2.2rem);
     color: var(--color-primary);
     margin: .5rem 0 1rem 0;
     text-align: center;
@@ -427,7 +429,7 @@ footer .logo{
     gap: 2rem;
 }
 
-#footer_email{
+#email_link{
     display: flex;
     justify-content: center;
     align-items: center;
@@ -436,15 +438,12 @@ footer .logo{
     background-color: var(--color-primary);
     padding: 2px 5px;
     border-radius: 5px;
-}
-
-#footer_email a{
     color: white;
     text-decoration: none;
     font-weight: 500;
 }
 
-#footer_email img{
+#email_link img{
     width: 32px;
 }
 
@@ -466,7 +465,7 @@ footer .logo{
     max-height: 80vh;
 }
 
-#modal_wrapper form, #modal_message{
+#modal_wrapper form, #modal_message_wrapper{
     background-color: white;
     padding: 2rem;
     border-radius: 10px;
