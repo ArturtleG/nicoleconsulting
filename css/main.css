@@ -67,6 +67,16 @@ hr {
 .u-flex-column { display: flex; flex-direction: column; }
 .u-flex-wrap {display: flex; flex-wrap: wrap; gap: 1rem;}
 .u-3-cols { flex: 1 1 calc(33.333% - 1rem); min-width: 350px; }
+.u-4-cols { flex: 1 1 calc(25% - 1rem); min-width: 250px; }
+.asterisk_w:before{
+    content: url("../images/asteriskW.svg");
+}
+.asterisk_p:before{
+    content: url("../images/asteriskP.svg");
+}
+.asterisk_pw:before{
+    content: url("../images/asteriskPW.svg");
+}
   
 .desktop{
     display: block;
@@ -284,23 +294,52 @@ h1 {
     gap: 2rem;
   } 
 
-  #services_list .blob h1{
+#services_list .blob h1{
     text-align: center;
-  }
+}
 
-  #services_options{
+#services_topics{
     display: flex;
     flex-direction: column;
     gap: 2rem;
-  }
+}
 
-  #resources_list{
+#services_options{
+    display: grid;
+    gap: 1rem;
+    /* 4 columns by default */
+    grid-template-columns: repeat(4, 1fr);
+}
+
+#services_options .blob img{
+    max-width: 150px;
+}
+
+#accolades{
+    display: grid;
+    gap: 1rem;
+    /* Two columns: left auto-sized, right takes the rest */
+    grid-template-columns: 1fr 1fr;
+    /* Two rows, auto-size by content (or fixed height if you prefer) */
+    grid-template-rows: auto auto;
+
+    /* Named template areas is purely optional but super-readable: */
+    grid-template-areas:
+        "featured service"
+        "awards  service";
+}
+
+#featured { grid-area: featured; }
+#awards   { grid-area: awards;   }
+#service  { grid-area: service;  }
+
+#resources_list{
     display: flex;
     gap: 4rem;
     justify-content: center;
     flex-wrap: wrap;
     padding: 2rem;
-  }
+}
 
 .primary{
     background-color: var(--color-primary);
@@ -313,14 +352,12 @@ h1 {
 }
 
 /* Apply to each endorsement blob */
-.quote {
+.symbol{
     position: relative;      /* establish containing block for the pseudo-elements */
-    padding: 2rem;           /* give room for the quotes */
+    padding: 2rem; 
 }
-  
-  /* Opening quote in top-left */
-.quote:before {
-    content: url("../images/openQ.svg"); 
+
+.symbol:before{
     position: absolute;
     top: -0.5rem;
     left: -0.5rem;
@@ -331,12 +368,17 @@ h1 {
     height: auto; 
 }
 
-  
-  /* Make sure your blob’s text sits on top */
-.quote * {
+.symbol * {
     position: relative;
     z-index: 1;
 }
+  
+  /* Opening quote in top-left */
+.quote:before {
+    content: url("../images/openQ.svg"); 
+}
+  
+/* Make sure your blob’s text sits on top */
 
 .endorsement_author{
     font-weight: 900;
@@ -542,10 +584,32 @@ footer .logo{
     }
 }
 
-@media(max-width:900px){
+@media(max-width: 1000px){
+    #services_options{
+        display: grid;
+        gap: 1rem;
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media(max-width: 900px){
     #services_list .blob{
         max-width: none !important;
         width: 100% !important;
+    }
+}
+
+@media (max-width: 850px) {
+    #accolades{
+      /* collapse to one column */
+      grid-template-columns: 1fr;
+      /* stack each area in its own row */
+      grid-template-areas:
+        "featured"
+        "service"
+        "awards";
+      /* optional: let the rows auto-size */
+      grid-template-rows: auto auto auto;
     }
 }
 
@@ -564,6 +628,12 @@ footer .logo{
 
     .blob{
         padding: 1rem;
+    }
+
+    #services_options{
+        display: grid;
+        gap: 1rem;
+        grid-template-columns: 1fr;
     }
 }
 
