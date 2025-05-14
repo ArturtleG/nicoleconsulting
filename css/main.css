@@ -65,7 +65,7 @@ hr {
   .u-flex-wrap   { flex-wrap: wrap; }
   .u-flex-column { display: flex; flex-direction: column; }
   .u-flex-wrap {display: flex; flex-wrap: wrap; gap: 1rem;}
-  .u-3-cols { flex: 1 1 calc(33.333% - 1rem); min-width: 250px; }
+  .u-3-cols { flex: 1 1 calc(33.333% - 1rem); min-width: 350px; }
   
 .desktop{
     display: block;
