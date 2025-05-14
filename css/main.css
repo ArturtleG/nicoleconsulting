@@ -48,11 +48,12 @@ html {
   }
   
   /* Utility classes */
-  .row{
+.row{
     width: 80%;
     position: relative;
     margin: 20px auto;
-  }
+}
+
 hr {
     overflow: visible; /* For IE */
     padding: 0;
@@ -60,12 +61,12 @@ hr {
     border-top: 1px solid  rgba(0,0,0,.2);
     margin: 2rem 10%;
 }
-  .u-flex-center { display: flex; justify-content: center; align-items: center; }
-  .u-flex-right { display: flex; justify-content: right; align-items: center; }
-  .u-flex-wrap   { flex-wrap: wrap; }
-  .u-flex-column { display: flex; flex-direction: column; }
-  .u-flex-wrap {display: flex; flex-wrap: wrap; gap: 1rem;}
-  .u-3-cols { flex: 1 1 calc(33.333% - 1rem); min-width: 350px; }
+.u-flex-center { display: flex; justify-content: center; align-items: center; }
+.u-flex-right { display: flex; justify-content: right; align-items: center; }
+.u-flex-wrap   { flex-wrap: wrap; }
+.u-flex-column { display: flex; flex-direction: column; }
+.u-flex-wrap {display: flex; flex-wrap: wrap; gap: 1rem;}
+.u-3-cols { flex: 1 1 calc(33.333% - 1rem); min-width: 350px; }
   
 .desktop{
     display: block;
@@ -78,7 +79,7 @@ hr {
   /*--------------------------------------------------------------
   3. FIXED HEADER & NAV
   --------------------------------------------------------------*/
-  header#top_menu {
+header#top_menu {
     position: fixed; top: 0; left: 0; width: 100%;
     background-image: linear-gradient(
       to right,
@@ -91,26 +92,26 @@ hr {
     justify-content: space-between;
     align-items: center;
     padding: var(--spacing) 2rem;
-  }
+}
   
-  header#top_menu .logo img {
+header#top_menu .logo img {
     height: 70px;
-  }
+}
   
-  nav ul {
+nav ul {
     list-style: none;
     display: flex;
     gap: .9rem;
     align-items: stretch;
     justify-content: center;
     text-align: center;
-  }
+}
   
-  nav a {
+nav a {
     color: white;
     text-decoration: none;
     font-weight: 500;
-  }
+}
 
   nav li{
     padding: 4px;
@@ -135,11 +136,11 @@ hr {
   /*--------------------------------------------------------------
   4. TYPOGRAPHY
   --------------------------------------------------------------*/
-  h1 {
+h1 {
     font-size: clamp(1.75rem, 6vw, 2.7rem);
     color: var(--color-primary);
     margin-bottom: .5rem;
-  }
+}
   
   h2 {
     font-family: 'Glass Antiqua', cursive;
@@ -309,6 +310,32 @@ hr {
 
 .primary h1{
     color: white !important;
+}
+
+/* Apply to each endorsement blob */
+.quote {
+    position: relative;      /* establish containing block for the pseudo-elements */
+    padding: 2rem;           /* give room for the quotes */
+}
+  
+  /* Opening quote in top-left */
+.quote:before {
+    content: url("../images/openQ.svg"); 
+    position: absolute;
+    top: -0.5rem;
+    left: -0.5rem;
+    pointer-events: none;     /* so it never blocks text selection */
+    z-index: 0;               /* behind your actual text */
+    display: block;
+    width: 2rem;          /* or whatever suits */
+    height: auto; 
+}
+
+  
+  /* Make sure your blob’s text sits on top */
+.quote * {
+    position: relative;
+    z-index: 1;
 }
 
 .endorsement_author{
