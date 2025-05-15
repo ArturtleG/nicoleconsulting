@@ -66,7 +66,7 @@ hr {
 .u-flex-wrap   { flex-wrap: wrap; }
 .u-flex-column { display: flex; flex-direction: column; }
 .u-flex-wrap {display: flex; flex-wrap: wrap; gap: 1rem;}
-.u-3-cols { flex: 1 1 calc(33.333% - 1rem); min-width: 350px; }
+.u-3-cols { flex: 1 1 calc(33.333% - 1rem); min-width: 275px; }
 .u-4-cols { flex: 1 1 calc(25% - 1rem); min-width: 250px; }
 .u-stretch { align-items: stretch; justify-content: stretch; justify-items: stretch;}
 .asterisk_w:before{
