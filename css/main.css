@@ -20,7 +20,7 @@ font-family: "Cedarville Cursive", cursive;
     --color-evolution-bg:rgba(0, 76, 109, .9);
   
     /* Spacing & sizing */
-    --spacing:           1rem;
+    --spacing:           0.5rem;
     --max-width:         1100px;
     --header-height:     105px; /* matches your header’s real height */
     --dots-width:        80px;
@@ -106,7 +106,7 @@ header#top_menu {
 }
   
 header#top_menu .logo img {
-    height: 70px;
+    height: 90px;
 }
   
 nav ul {
