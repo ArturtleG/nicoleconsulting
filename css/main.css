@@ -339,7 +339,7 @@ p:not(:last-child){
     display: grid;
     gap: 1rem;
     /* Two columns: left auto-sized, right takes the rest */
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: 1.2fr 0.8fr;
     /* Two rows, auto-size by content (or fixed height if you prefer) */
     grid-template-rows: auto auto;
 
