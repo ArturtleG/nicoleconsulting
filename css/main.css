@@ -68,6 +68,7 @@ hr {
 .u-flex-wrap {display: flex; flex-wrap: wrap; gap: 1rem;}
 .u-3-cols { flex: 1 1 calc(33.333% - 1rem); min-width: 350px; }
 .u-4-cols { flex: 1 1 calc(25% - 1rem); min-width: 250px; }
+.u-stretch { align-items: stretch; justify-content: stretch; justify-items: stretch;}
 .asterisk_w:before{
     content: url("../images/asteriskW.svg");
 }
@@ -168,11 +169,14 @@ h1 {
     font-size: clamp(1.3rem, 3vw, 1.75rem);
   }
   
-  p {
+p{
     font-size: clamp(1.2rem, 2.5vw, 1.4rem);
     line-height: clamp(1.4rem, 2.6vw ,1.6rem);
+}
+
+p:not(:last-child){
     margin-bottom: 1.5rem;
-  }
+}
   
   /* Button styles share a pattern */
   .primary-button,
@@ -214,6 +218,18 @@ h1 {
   .white_transparent{
     background-color: rgba(255, 255, 255, 0.8);
     color: black;
+    border: 6px solid var(--color-primary);
+  }
+
+  .white{
+    background-color: white;
+    color: black;
+  }
+
+  .white h4{
+    color: var(--color-primary);
+    text-transform: uppercase;
+    font-size: clamp(1.5rem, 3.2vw, 1.8rem);
   }
   
   /*--------------------------------------------------------------
@@ -315,6 +331,10 @@ h1 {
     max-width: 150px;
 }
 
+#services_options .blob .title2{
+    min-height: 4rem;
+}
+
 #accolades{
     display: grid;
     gap: 1rem;
@@ -402,13 +422,24 @@ h1 {
     border-radius: 10px;
   }
 
-.blob .title{
+.border{
+    border: 3px solid black
+}
+
+.blob .title, .blob .title2{
     font-size: clamp(2.5rem, 6vw, 2.7rem);
     line-height: clamp(2rem, 5.5vw, 2.2rem);
     color: var(--color-primary);
     margin: .5rem 0 1rem 0;
     text-align: center;
     font-weight: 900;
+    min-height: 5rem;
+}
+
+.blob .title2{
+    font-size: clamp(2.2rem, 5.7vw, 2.4rem);
+    line-height: clamp(1.7rem, 5.2vw, 1.9rem);
+    min-height: 4rem;
 }
 
 .blob ul{
