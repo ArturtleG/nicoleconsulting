@@ -216,6 +216,14 @@ p:not(:last-child){
     z-index: 0;
 }
 
+.hero-header{
+    /*position: absolute;
+    top: 5px;
+    right: 5px;*/
+    height: 100px;
+    display: none;
+}
+
 .hero.mobile{
     height: auto;
 }
@@ -570,14 +578,6 @@ footer .logo{
         scroll-margin-top: 150px;
     }
 
-    .desktop{
-        display: none;
-    }
-
-    .mobile{
-        display: block;
-    }
-
     .hero-background{
         position: relative;
         max-width: 50%;
@@ -585,7 +585,33 @@ footer .logo{
         display: block;
         margin: 0 auto;
     }
-}
+
+    .hero {
+      height: auto;               /* let it grow to fit content */
+    }
+  
+    #hero-wrapper {
+      position: static;           
+      transform: none;
+      width: 100%;
+      max-width: none;
+      padding: 2rem 1rem;         
+    }
+  
+    .hero-text {
+      position: static;
+      max-width: 85%;
+      margin: 1.5rem auto;
+    }
+
+    .desktop{
+        display: none;
+    }
+
+    .mobile{
+        display: block;
+    }
+  }
 
 @media(max-width: 1200px){
     #services_options{
@@ -625,8 +651,8 @@ footer .logo{
 
 @media(max-width: 500px){
     .hero-background{
-        max-width: 100%;
-        max-height: 100%;
+        max-width: 80%;
+        max-height: 80%;
     }
 
     .blob{

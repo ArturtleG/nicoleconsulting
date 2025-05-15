@@ -44,6 +44,41 @@ $(document).ready(function () {
       });
 });
 
+$(function(){
+    var $win         = $(window);
+    var $heroHeader  = $('.hero-header').hide();       // start hidden
+    var $heroBgs     = $('.hero-background');          // both desktop & mobile versions
+  
+    function checkHeroScroll(){
+      var scrollTop = $win.scrollTop();
+  
+      // pick whichever hero-bg is currently visible
+      var $bg = $heroBgs.filter(function(){
+        return $(this).is(':visible');
+      });
+  
+      // compute bottom of that image
+      var bgBottom = $bg.offset().top + $bg.outerHeight();
+  
+      if (scrollTop >= bgBottom) {
+        // fade in once we scroll past that bottom edge
+        if (!$heroHeader.is(':visible')) {
+          $heroHeader.stop(true,true).fadeIn(300);
+        }
+      } else {
+        // fade it back out if we scroll above it
+        if ($heroHeader.is(':visible')) {
+          $heroHeader.stop(true,true).fadeOut(300);
+        }
+      }
+    }
+  
+    // run on scroll and on resize (in case mobile ↔ desktop switch)
+    $win.on('scroll resize', checkHeroScroll);
+    // also call once on load in case you’re already scrolled
+    checkHeroScroll();
+  });
+
 function closeModal() {
     modal.addClass("no_display"); 
     modalMessage.addClass("no_display");
