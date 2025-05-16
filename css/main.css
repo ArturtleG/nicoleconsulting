@@ -121,25 +121,33 @@ nav a {
   --------------------------------------------------------------*/
 h1 {
     font-size: clamp(1.75rem, 6vw, 2.7rem);
-    color: var(--color-primary);
     margin-bottom: .5rem;
 }
   
-  h2 {
+h2 {
     font-family: 'Glass Antiqua', cursive;
-    font-size: clamp(2rem, 5vw, 2.5rem);
+    font-size: clamp(1.5rem, 5.5vw, 2.5rem);
     margin: var(--spacing) 0;
-  }
+}
   
-  h3 {
+h3 {
     font-family: 'Glass Antiqua', cursive;
-    font-size: clamp(1.75rem, 4vw, 2rem);
+    font-size: clamp(1.3rem, 5vw, 2.2rem);
     margin-bottom: 1rem;
-  }
+}
 
-  h4{
-    font-size: clamp(1.3rem, 3vw, 1.75rem);
-  }
+h4{
+    font-size: clamp(1rem, 4vw, 1.8rem);
+}
+
+h5{
+    font-size: clamp(1rem, 3.5vw, 1.5rem);
+}
+
+.uppercase{
+    text-transform: uppercase;
+}
+
   
 p{
     font-size: clamp(1.2rem, 2.5vw, 1.4rem);
@@ -198,11 +206,11 @@ p:not(:last-child){
     color: black;
   }
 
-  .white h4{
+  /*.white h4{
     color: var(--color-primary);
     text-transform: uppercase;
     font-size: clamp(1.5rem, 3.2vw, 1.8rem);
-  }
+  }*/
   
   /*--------------------------------------------------------------
   6. HERO
@@ -318,7 +326,6 @@ p:not(:last-child){
 .blob .title_r{
     font-size: clamp(1.6rem, 4vw, 2rem);
     line-height: clamp(1rem, 3.5vw, 1.7rem);
-    color: var(--color-primary);
     margin: 0;
     text-align: left;
 }
@@ -327,7 +334,7 @@ p:not(:last-child){
     display: grid;
     gap: 1rem;
     /* Two columns: left auto-sized, right takes the rest */
-    grid-template-columns: 1.2fr 0.8fr;
+    grid-template-columns: 1.15fr 0.85fr;
     /* Two rows, auto-size by content (or fixed height if you prefer) */
     grid-template-rows: auto auto;
 
@@ -350,14 +357,18 @@ p:not(:last-child){
 }
 
 .primary{
+    color: var(--color-primary);
+}
+
+.primary_back{
     background-color: var(--color-primary);
     border-radius: 10px;
     color: white !important;
 }
 
-.primary h1{
+/*.primary h1{
     color: white !important;
-}
+}*/
 
 /* Apply to each endorsement blob */
 .symbol{
