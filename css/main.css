@@ -315,6 +315,10 @@ p:not(:last-child){
     min-height: 4rem;
 }
 
+#otherOption p{
+    text-align: left;
+}
+
 #accolades{
     display: grid;
     gap: 1rem;
