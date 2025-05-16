@@ -642,6 +642,14 @@ footer .logo{
     }
 }
 
+@media(max-width: 650px){
+    #services_options{
+        display: grid;
+        gap: 1rem;
+        grid-template-columns: 1fr;
+    }
+}
+
 @media(max-width: 600px){
     footer{
         flex-direction: column;
@@ -657,12 +665,6 @@ footer .logo{
 
     .blob{
         padding: 1rem;
-    }
-
-    #services_options{
-        display: grid;
-        gap: 1rem;
-        grid-template-columns: 1fr;
     }
 }
 

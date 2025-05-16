@@ -45,37 +45,40 @@ $(document).ready(function () {
 });
 
 $(function(){
-    var $win         = $(window);
-    var $heroHeader  = $('.hero-header').hide();       // start hidden
-    var $heroBgs     = $('.hero-background');          // both desktop & mobile versions
+    var $win        = $(window);
+    var $heroHeader = $('.hero-header').hide();
+    var $heroBgs    = $('.hero-background'); 
+    var visible     = false;
+  
+    // compute header height once (if it’s static)
+    var headerH = $('#top_menu').outerHeight() || 0;
   
     function checkHeroScroll(){
       var scrollTop = $win.scrollTop();
   
-      // pick whichever hero-bg is currently visible
-      var $bg = $heroBgs.filter(function(){
-        return $(this).is(':visible');
-      });
+      // pick the visible hero image (desktop or mobile)
+      var $bg = $heroBgs.filter(':visible');
+      if (!$bg.length) return;  // safety
   
-      // compute bottom of that image
+      // bottom edge of that image
       var bgBottom = $bg.offset().top + $bg.outerHeight();
   
-      if (scrollTop >= bgBottom) {
-        // fade in once we scroll past that bottom edge
-        if (!$heroHeader.is(':visible')) {
-          $heroHeader.stop(true,true).fadeIn(300);
-        }
-      } else {
-        // fade it back out if we scroll above it
-        if ($heroHeader.is(':visible')) {
-          $heroHeader.stop(true,true).fadeOut(300);
-        }
+      // define threshold so it accounts for the fixed header
+      var threshold = bgBottom - headerH;
+  
+      if (!visible && scrollTop >= threshold) {
+        // scroll down past threshold → fade in
+        $heroHeader.stop(true,true).fadeIn(1000);
+        visible = true;
+      }
+      else if (visible && scrollTop < threshold) {
+        // scroll up above threshold → fade out
+        $heroHeader.stop(true,true).fadeOut(1000);
+        visible = false;
       }
     }
   
-    // run on scroll and on resize (in case mobile ↔ desktop switch)
     $win.on('scroll resize', checkHeroScroll);
-    // also call once on load in case you’re already scrolled
     checkHeroScroll();
   });
 
