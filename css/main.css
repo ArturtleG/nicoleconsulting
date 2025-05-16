@@ -315,7 +315,11 @@ p:not(:last-child){
     min-height: 4rem;
 }
 
-#otherOption p{
+.blob .title_r{
+    font-size: clamp(1.6rem, 4vw, 2rem);
+    line-height: clamp(1rem, 3.5vw, 1.7rem);
+    color: var(--color-primary);
+    margin: 0;
     text-align: left;
 }
 
@@ -396,6 +400,10 @@ p:not(:last-child){
     border-radius: 10px;
     font-size: clamp(1.2rem, 2.5vw, 1.4rem);
     line-height: clamp(1.4rem, 2.6vw ,1.6rem);
+  }
+
+  .blob.smallPadding{
+    padding: 1rem 2rem;
   }
 
   .blob img{
