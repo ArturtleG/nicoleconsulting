@@ -46,7 +46,8 @@ $(document).ready(function () {
 
 $(function(){
     var $win        = $(window);
-    var $heroHeader = $('.hero-header').hide();
+    var $heroHeaderWrapper = $('.hero-header-wrapper');
+    var $heroHeader = $('.hero-header');//.hide();
     var $heroBgs    = $('.hero-background'); 
     var visible     = false;
   
@@ -68,12 +69,15 @@ $(function(){
   
       if (!visible && scrollTop >= threshold) {
         // scroll down past threshold → fade in
-        $heroHeader.stop(true,true).fadeIn(1000);
+        //$heroHeader.stop(true,true).fadeIn(1000);
+        $heroHeaderWrapper.addClass('fade-in');
+
         visible = true;
       }
       else if (visible && scrollTop < threshold) {
         // scroll up above threshold → fade out
-        $heroHeader.stop(true,true).fadeOut(1000);
+        //$heroHeader.stop(true,true).fadeOut(1000);
+        $heroHeaderWrapper.removeClass('fade-in');
         visible = false;
       }
     }

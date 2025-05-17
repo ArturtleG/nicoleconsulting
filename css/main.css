@@ -224,13 +224,32 @@ p:not(:last-child){
     z-index: 0;
 }
 
-.hero-header{
-    /*position: absolute;
-    top: 5px;
-    right: 5px;*/
-    height: 100px;
-    display: none;
+.hero-header-wrapper{
+    height: 90px;
+    width: 0;
+    transition: width   2s ease;
+    display: inline-block;
+    position: relative;
 }
+
+.hero-header{
+    height: 100px;
+    opacity: 0;
+    transition: opacity 3s ease;
+    position: absolute;
+    top:0;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+.fade-in{
+    width: 90px;
+}
+
+.fade-in .hero-header{
+    opacity: 1;
+}
+
 
 .hero.mobile{
     height: auto;
@@ -586,11 +605,6 @@ footer .logo{
 }
 
 @media(max-width: 980px){
-    #top_menu{
-        flex-direction: column;
-        gap: 0;
-        height: 160px;
-    }
     .hero::before {
         width: 40px;
     }
@@ -652,6 +666,11 @@ footer .logo{
 }
 
 @media (max-width: 850px) {
+    #top_menu{
+        flex-direction: column;
+        gap: 0;
+        height: 160px;
+    }
     #accolades{
       /* collapse to one column */
       grid-template-columns: 1fr;
