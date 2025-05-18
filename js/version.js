@@ -26,8 +26,7 @@ $(function(){
               dd   + '.' +
               hh   + '.' +
               mi   + '.' +
-              ss   + '.' +
-              msec;
+              ss;
 
             $el.attr(attr, url + '?v=' + versionString);
           }
