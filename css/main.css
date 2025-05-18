@@ -11,13 +11,13 @@ html {
     scroll-behavior: smooth;
 }
   
-  body {
+body {
     min-height: 100%;
     font-family: 'Hubballi', sans-serif;
     color: var(--color-text);
     background: var(--color-bg);
     padding-top: var(--header-height); /* push content below fixed header */
-  }
+}
   
   /* Utility classes */
 .row{
@@ -120,24 +120,24 @@ nav a {
   4. TYPOGRAPHY
   --------------------------------------------------------------*/
 h1 {
-    font-size: clamp(1.75rem, 6vw, 2.7rem);
+    font-size: clamp(1.9rem, 6vw, 2.7rem);
     margin-bottom: .5rem;
 }
   
 h2 {
     font-family: 'Glass Antiqua', cursive;
-    font-size: clamp(1.5rem, 5.5vw, 2.5rem);
+    font-size: clamp(1.7rem, 5.5vw, 2.5rem);
     margin: var(--spacing) 0;
 }
   
 h3 {
     font-family: 'Glass Antiqua', cursive;
-    font-size: clamp(1.3rem, 5vw, 2.2rem);
+    font-size: clamp(1.6rem, 5vw, 2.2rem);
     margin-bottom: 1rem;
 }
 
 h4{
-    font-size: clamp(1rem, 4vw, 1.8rem);
+    font-size: clamp(1.4rem, 4vw, 1.8rem);
 }
 
 h5{
@@ -609,12 +609,6 @@ footer .logo{
     .hero::before {
         width: 40px;
     }
-    body{
-        padding-top: 150px;
-    }
-    section{
-        scroll-margin-top: 150px;
-    }
 
     .hero-background{
         position: relative;
@@ -670,18 +664,30 @@ footer .logo{
     #top_menu{
         flex-direction: column;
         gap: 0;
-        height: 160px;
+        height: var(--header-height-m);
     }
+
+    body{
+        padding-top: var(--header-height-m);
+    }
+
+    section{
+        scroll-margin-top: var(--header-height-m);
+    }
+
     #accolades{
-      /* collapse to one column */
       grid-template-columns: 1fr;
-      /* stack each area in its own row */
       grid-template-areas:
         "featured"
         "service"
         "awards";
-      /* optional: let the rows auto-size */
       grid-template-rows: auto auto auto;
+    }
+}
+
+@media(min-width: 850px){
+    .hero-header-wrapper{
+        width: 90px;
     }
 }
 

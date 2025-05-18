@@ -22,6 +22,7 @@ font-family: "Cedarville Cursive", cursive;
     /* Spacing & sizing */
     --spacing:           0.5rem;
     --max-width:         1100px;
-    --header-height:     105px; /* matches your header’s real height */
+    --header-height:     105px;
+    --header-height-m:   132px;
     --dots-width:        80px;
 }
