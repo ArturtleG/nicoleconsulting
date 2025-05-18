@@ -33,6 +33,7 @@ hr {
     border-top: 1px solid  rgba(0,0,0,.2);
     margin: 2rem 10%;
 }
+
 .u-flex-center { display: flex; justify-content: center; align-items: center; }
 .u-flex-right { display: flex; justify-content: right; align-items: center; }
 .u-flex-wrap   { flex-wrap: wrap; }
@@ -44,9 +45,11 @@ hr {
 .asterisk_w:before{
     content: url("../images/asteriskW.svg");
 }
+
 .asterisk_p:before{
     content: url("../images/asteriskP.svg");
 }
+
 .asterisk_pw:before{
     content: url("../images/asteriskPW.svg");
 }
