@@ -345,7 +345,7 @@ p:not(:last-child){
 
 .blob .title_r{
     font-size: clamp(1.6rem, 4vw, 2rem);
-    line-height: clamp(1rem, 3.5vw, 1.7rem);
+    line-height: clamp(1.3rem, 3.5vw, 1.7rem);
     margin: 0;
     text-align: left;
 }
