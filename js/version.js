@@ -21,11 +21,11 @@ $(function(){
             var msec = String(d.getMilliseconds()).padStart(3, '0');
 
             var versionString = 
-              yyyy + '.' +
-              MM   + '.' +
-              dd   + '.' +
-              hh   + '.' +
-              mi   + '.' +
+              yyyy + '-' +
+              MM   + '-' +
+              dd   + '_' +
+              hh   + ':' +
+              mi   + ':' +
               ss;
 
             $el.attr(attr, url + '?v=' + versionString);
