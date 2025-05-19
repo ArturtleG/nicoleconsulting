@@ -236,7 +236,6 @@ p:not(:last-child){
 }
 
 .hero-header{
-    height: 100px;
     opacity: 0;
     transition: opacity 1s ease;
     position: absolute;
