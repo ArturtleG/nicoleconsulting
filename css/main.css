@@ -241,8 +241,8 @@ p:not(:last-child){
     transition: opacity 1s ease;
     position: absolute;
     top:0;
-    left: 50%;
-    transform: translateX(-50%);
+    left: 0;
+    /*transform: translateX(-50%);*/
 }
 
 .fade-in{
@@ -688,11 +688,11 @@ footer .logo{
     }
 }
 
-@media(min-width: 850px){
+/*@media(min-width: 850px){
     .hero-header-wrapper{
         width: 90px;
     }
-}
+}*/
 
 @media(max-width: 650px){
     #services_options{
