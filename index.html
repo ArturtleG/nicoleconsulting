@@ -3,12 +3,31 @@
     <head>
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <meta name="description" content="Nicole McRee is a science consultant offering NGSS-aligned professional learning, instructional coaching, and curriculum design.">
+        
+        <meta property="og:title" content="Nicole McRee Educational Consulting">
+        <meta property="og:image" content="https://mcree-ed.consulting/images/portraitCircle.png">
+        <meta property="og:url" content="https://mcree-ed.consulting/">
+        <meta property="og:type" content="website">
+        <meta property="og:description" content="Nicole McRee is a science consultant offering NGSS-aligned professional learning, instructional coaching, and curriculum design.">
+
+        <meta name="twitter:card" content="summary_large_image">
+        <meta name="twitter:title" content="Nicole McRee Educational Consulting">
+        <meta name="twitter:description" content="Nicole McRee is a science consultant offering NGSS-aligned professional learning, instructional coaching, and curriculum design.">
+        <meta name="twitter:image" content="https://mcree-ed.consulting/images/portraitCircle.png">
+        
         <title>Nicole McRee Consulting</title>
+        
+        <link rel="canonical" href="https://mcree-ed.consulting/">
         <link rel="icon" type="image/x-icon" href="images/Initials.svg">
         <link rel="stylesheet" href="css/root.css" data-version/>
         <link rel="stylesheet" href="css/scroll.css" data-version/>
         <link rel="stylesheet" href="css/main.css" data-version/>
-        <script src="js/jquery-3.7.1.min.js"></script>
+
+        <link rel="preload" as="image" href="images/nicoleSplash2_.png">
+        <link rel="preload" as="image" href="images/portraitCircle.png">
+
+        <script src="js/jquery-3.7.1.min.js" async></script>
     </head>
     <body>
         <!-- fixed header -->
@@ -16,9 +35,9 @@
             <div class="logo">
                 
                 <div class="hero-header-wrapper">
-                    <img class="hero-header" src="images/portraitCircle.png" alt="Portrait of Nicole McCree"/>
+                    <img class="hero-header" src="images/portraitCircle.png" alt="Portrait of Nicole McCree" loading="eager"/>
                 </div>
-                <img src="images/nicoleSignatureWhiteF.svg" alt="Nicole McCree signature logo" />
+                <img src="images/nicoleSignatureWhiteF.svg" alt="Nicole McCree signature logo" loading="eager"/>
             </div>
             <nav aria-label="Main navigation">
                 <ul>
@@ -35,8 +54,8 @@
             <!-- hero desktop -->
             <section class="hero">
                 <div id="hero-wrapper">
-                    <img class="hero-background desktop" src="images/nicoleSplash2_.png" alt="Portrait of Nicole McCree"/>
-                    <img class="hero-background mobile" src="images/portraitCircle.png" alt="Portrait of Nicole McCree"/>
+                    <img class="hero-background desktop" src="images/nicoleSplash2_.png" alt="Portrait of Nicole McCree" loading="eager"/>
+                    <img class="hero-background mobile" src="images/portraitCircle.png" alt="Portrait of Nicole McCree" loading="eager"/>
                     <div class="hero-text">
                         <h1 class="primary">Hi… I'm Nicole:</h1>
                         <p>
@@ -48,9 +67,9 @@
                             thriving PLC, I'm here to help.
                         </p>
                         <div class="u-flex-right">
-                            <div class="contact_button primary-button">
+                            <button class="contact_button primary-button">
                                 Let's Transform Learning Together
-                            </div>
+                            </button>
                         </div>
                 </div>
             </section>
@@ -71,7 +90,7 @@
 
                 <div id="services_list" class="row u-flex-wrap">
                     <div class="blob white_transparent u-3-cols">
-                        <img class="border" src="photos/activity2.jpg" alt="Nicole McCree initials logo"/>
+                        <img class="border" src="photos/activity2.jpg" alt="professional learning image" loading="lazy"/>
                         <div class="title2 u-flex-center">Professional Learning</div>
                         <p>
                             Tailored workshop designed to meet your unique goals and challenges, 
@@ -80,7 +99,7 @@
                         </p>
                     </div>
                     <div class="blob white_transparent u-3-cols">
-                        <img class="border" src="photos/activity.jpg" alt="Nicole McCree initials logo"/>
+                        <img class="border" src="photos/activity.jpg" alt="Consulting image" loading="lazy"/>
                         <div class="title2 u-flex-center">Consulting</div>
                         <p>
                             Individualized support and expert guidance to implement effective strategies, 
@@ -89,7 +108,7 @@
                         </p>
                     </div>
                     <div class="blob white_transparent u-3-cols">
-                        <img class="border" src="photos/nicoleCoaching.jpg" alt="Nicole McCree initials logo"/>
+                        <img class="border" src="photos/nicoleCoaching.jpg" alt="Coaching image" loading="lazy"/>
                         <div class="title2 u-flex-center">Coaching</div>
                         <p>
                             Targeted support to instructional leaders and educators through personalized 
@@ -104,19 +123,19 @@
                 
                 <div id="services_options" class="row">
                     <div class="blob white_transparent u-flex-column u-stretch">
-                        <img src="images/option1h.png" alt="1 hour icon"/>
+                        <img src="images/option1h.png" alt="1 hour icon" loading="lazy"/>
                         <div class="title2 u-flex-center">One hour keynote/staff meeting</div>
                     </div>
                     <div class="blob white_transparent u-flex-column u-stretch">
-                        <img  src="images/option1d.png" alt="1 day icon"/>
+                        <img  src="images/option1d.png" alt="1 day icon" loading="lazy"/>
                         <div class="title2 u-flex-center">Full day</div>
                     </div>
                     <div class="blob white_transparent">
-                        <img  src="images/optionsHd.png" alt="1/2 day icon"/>
+                        <img  src="images/optionsHd.png" alt="1/2 day icon" loading="lazy"/>
                         <div class="title2 u-flex-center">Half day</div>
                     </div>
                     <div class="blob white_transparent">
-                        <img  src="images/optionCalendar.png" alt="calendar icon"/>
+                        <img  src="images/optionCalendar.png" alt="calendar icon loading="lazy""/>
                         <div class="title2 u-flex-center">Monthly or bimonthly cycles</div>
                     </div>
                 </div>
@@ -360,26 +379,26 @@
                     <h2>Endorsements</h2>
                 </div>
                 <div id="endorsements_text" class="row flex_wrap">
-                    <div class="blob primary_back symbol quote">
+                    <article class="blob primary_back symbol quote" itemprop="review">
                         Without Nicole, my entire grade-level-team's lessons - especially in science - 
                         would not be as engaging, reflective, or impactful as they are. Her flexibility, 
                         willingness to collaborate, and depth of knowledge on professional development and 
                         teaching strategies, has further advanced our instruction and the learning for all 
                         of our students.
-                    </div>
+                    </article>
                     <p class="endorsement_author">- 3rd Grade Teacher (Grayslake School, District #46)</p>
 
-                    <div class="blob primary_back symbol quote">
+                    <article class="blob primary_back symbol quote" itemprop="review">
                         Nicole is a dynamic speaker and presenter who engages staff in applicable 
                         professional learning. Our PD space was transformed into a classroom as Nicole led 
                         teachers through exercises that mimicked how students who speak other languages 
                         feel while learning science in our schools. Teachers left with actionable ways to 
                         scaffold science education as well as an understanding of our district's data 
                         regarding English learners.
-                    </div>
+                    </article>
                     <p class="endorsement_author">- Director of Teaching & Learning (Oak Grove School, District #68)</p>
 
-                    <div class="blob primary_back symbol quote">
+                    <article class="blob primary_back symbol quote" itemprop="review">
                         <span>Working with Nicole for the past 6 years was an exceptional experience. Her creativity, 
                         intelligence, and deep knowledge of science education consistently brought fresh perspectives 
                         to our work. Whether we were designing curriculum, integrating inquiry-based learning, or 
@@ -394,27 +413,27 @@
                         <span>Nicole is more than a consultant; she is a mentor and thought partner who brings insight, 
                         integrity, and inspiration to every conversation. I recommend her without hesitation to any 
                         individual or organization seeking support in science education or broader educational growth.</span>
-                    </div>
+                    </article>
                     <p class="endorsement_author"> - 6th Grade Teacher (Woodlawn Middle School, KCSD #96)</p>
 
-                    <div class="blob primary_back symbol quote">
+                    <article class="blob primary_back symbol quote" itemprop="review">
                         I have had the pleasure of working alongside Nicole McRee on various occasions for 
                         middle school science instruction where Nicole's deep expertise, collaborative spirit, 
                         and innovative approach consistently elevated both teaching practices and student 
                         engagement. Nicole's transition to educational consulting is a tremendous gain for any 
                         school or district seeking impactful, results-driven support in Science & STEM education.
-                    </div>
+                    </article>
                     <p class="endorsement_author">- Middle School Advanced Learning Specialist (Arlington Heights School, District #25)</p>
 
-                    <div class="blob primary_back symbol quote">
+                    <article class="blob primary_back symbol quote" itemprop="review">
                         Working with Nicole was a game-changer, her deep science knowledge, collaborative spirit, 
                         and hands-on coaching helped us elevate our instructional practices and grow as educators.
-                    </div>
+                    </article>
                     <p class="endorsement_author">- 1st Grade Instructional Coach (Prairie Elementary School, KCSD #96)</p>
 
                 </div>
                 <div class="row u-flex-right">
-                    <div class="endorse_button primary-button">Endorse</div>
+                    <button class="endorse_button primary-button">Endorse</button>
                 </div>
             </section>
 
@@ -435,23 +454,27 @@
                 </div>
             </section>
             <div id="social">
-                <a href="https://www.linkedin.com/in/nicole-mcree-252960320/" target="_blank"><img src="images/linkedIn.svg"/></a>
-                <a href="https://x.com/NicoleMcBado/" target="_blank"><img src="images/x.svg"/></a>
+                <a href="https://www.linkedin.com/in/nicole-mcree-252960320/" target="_blank">
+                    <img src="images/linkedIn.svg" alt="LinkedIn Logo" loading="eager"/>
+                </a>
+                <a href="https://x.com/NicoleMcBado/" target="_blank">
+                    <img src="images/x.svg" alt="X Logo" loading="eager"/>
+                </a>
             </div>
             <footer id="footer">
                 <div id="logo_wrapper">
-                    <img class="logo" src="images/Initials.svg" alt="Nicole McRree initials logo"/>
+                    <img class="logo" src="images/Initials.svg" alt="Nicole McRree initials logo" loading="lazy"/>
                     <div>&copy; 2025 Nicole McRee Consulting. All rights reserved.</div>
                 </div>
                 <a id="email_link" href="mailto:nicole@mcree-ed.consulting" target="_blank">
-                    <img class="emailIcon" src="images/emailIconW.svg" alt="email icon"/>
+                    <img class="emailIcon" src="images/emailIconW.svg" alt="email icon"  loading="lazy"/>
                     nicole@mcree-ed.consulting
                 </a>
             </footer>
 
             <!-- Modal -->
             <div id="modal_wrapper" class="no_display">
-                <form action="" method="POST" class="no_display">
+                <form action="" method="POST" class="no_display" aria-label="Contact Nicole McRee Educational Consulting">
                     <label>
                         Your name:
                         <input type="text" name="name">
@@ -479,7 +502,47 @@
                 </div>
             </div>
         </main>
-        <script src="js/main.js" data-version></script>
-        <script src="js/version.js"></script>
+
+        <script src="js/main.js" data-version defer></script>
+        <script src="js/version.js" defer></script>
+        <script type="application/ld+json">
+            {
+            "@context": "https://schema.org",
+            "@graph": [
+                {
+                "@type": "Organization",
+                "@id": "https://mcree-ed.consulting/#org",
+                "name": "Nicole McRee Education Consulting",
+                "url": "https://mcree-ed.consulting",
+                "logo": "https://mcree-ed.consulting/images/Initials.svg",
+                "description": "Science consultant offering NGSS professional learning, instructional coaching, and curriculum design.",
+                "sameAs": [
+                    "https://www.linkedin.com/in/nicole-mcree-252960320/",
+                    "https://x.com/NicoleMcBado"
+                ],
+                "contactPoint": {
+                    "@type": "ContactPoint",
+                    "email": "nicole@mcree-ed.consulting",
+                    "contactType": "Customer Service",
+                    "areaServed": "US",
+                    "availableLanguage": "English"
+                }
+                },
+                {
+                "@type": "Person",
+                "@id": "https://mcree-ed.consulting/#nicole",
+                "name": "Nicole McRee",
+                "jobTitle": "Science Consultant",
+                "worksFor": {
+                    "@id": "https://mcree-ed.consulting/#org"
+                },
+                "sameAs": [
+                    "https://www.linkedin.com/in/nicole-mcree-252960320/",
+                    "https://x.com/NicoleMcBado"
+                ]
+                }
+            ]
+            }
+        </script>
     </body>
 </html>
