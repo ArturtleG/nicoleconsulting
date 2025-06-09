@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Bellota:ital,wght@0,300;0,400;0,700;1,300;1,400;1,700&family=Cedarville+Cursive&family=Courier+Prime:ital,wght@0,400;0,700;1,400;1,700&family=Glass+Antiqua&family=Hubballi&family=Hurricane&family=Quicksand:wght@300..700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Varela+Round&display=swap&family=Josefin+Sans:ital,wght@0,100..700;1,100..700&family=Bellota:ital,wght@0,300;0,400;0,700;1,300;1,400;1,700&family=Philosopher:ital,wght@0,400;0,700;1,400;1,700&family=Cedarville+Cursive&family=Courier+Prime:ital,wght@0,400;0,700;1,400;1,700&family=Glass+Antiqua&family=Hubballi&family=Hurricane&family=Quicksand:wght@300..700&display=swap');
 /*
 font-family: "Courier Prime", monospace;
 font-family: "Glass Antiqua", cursive;
@@ -7,6 +7,9 @@ font-family: "Bellota", system-ui;
 font-family: "Hubballi", sans-serif;
 font-family: "Hurricane", cursive;
 font-family: "Cedarville Cursive", cursive;
+font-family: "Philosopher", sans-serif;
+font-family: "Josefin Sans", sans-serif;
+font-family: "Varela Round", sans-serif;
 */
 
 :root {
@@ -14,7 +17,7 @@ font-family: "Cedarville Cursive", cursive;
     --color-text:        #1a1a1a;
     --color-bg:          #fbfbfb;
     --color-primary:     #004c6d;
-    --color-accent:      #5ac8d8;
+    --color-accent:      #22abc0;
     --color-header-1:    rgba(0, 76, 109, 1);
     --color-header-2:    rgba(0, 76, 109, 0.9);
     --color-evolution-bg:rgba(0, 76, 109, .9);

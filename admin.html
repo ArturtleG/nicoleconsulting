@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Admin Login</title>
+        <link rel="icon" type="image/x-icon" href="images/Initials.svg">
+        <link rel="stylesheet" href="css/root.css" data-version/>
+        <link rel="stylesheet" href="css/scroll.css" data-version/>
+        <link rel="stylesheet" href="css/main.css" data-version/>
+        <!--<link rel="stylesheet" href="https://unpkg.com/trix@2.0.0/dist/trix.css">-->
+        <link rel="stylesheet" href="css/trix.css">
+        <link rel="stylesheet" href="css/blog.css" data-version/>
+        <!--<link rel="preload" as="image" href="images/nicoleSplash2_.png">
+        <link rel="preload" as="image" href="images/portraitCircle.png">-->
+
+        <script src="js/jquery-3.7.1.min.js"></script>
+    </head>
+    
+    <body class="dots">
+        <header id="top_menu">
+            <div class="logo">
+                <div class="hero-header-wrapper">
+                    <img class="hero-header" src="images/portraitCircle.png" alt="Portrait of Nicole McCree" loading="eager"/>
+                </div>
+                <img src="images/nicoleSignatureWhiteF.svg" alt="Nicole McCree signature logo" loading="eager"/>
+            </div>
+            <button id="new_post_button" class="primary-button">New Post</button>
+        </header>
+
+        <div id="login_wrapper">
+            <h1>Blog Admin Login</h1>
+            <button id="login_button" class="primary-button">Sign in with Google</button>
+        </div>
+        <section id="previous_posts_wrapper" style="display: none;">
+            <div class="row">
+                <div id="previous_posts"></div>
+            </div>
+        </section>
+        <div id="modal" style="display: none;">
+            <div id="form_wrapper">
+                <div id="form_heading">New Post</div>
+                <form id="post_form">
+                    <div id="form_scroll_wrapper">
+                        <div id="form_info">
+                            <label>
+                                <h5 class="primary uppercase">Title</h5>
+                                <input type="text" id="title" required>
+                            </label>
+                            <label>
+                                <h5 class="primary uppercase">Slug</h5>
+                                <input type="text" id="slug" placeholder="e.g. how-ngss-builds-equity" required>
+                            </label>
+
+                            <label>
+                                <h5 class="primary uppercase">Tags</h5>
+                                <input type="text" id="tags" placeholder="e.g. NGSS, PLC, workshop" required>
+                            </label>
+                        </div>
+                        <div id="blog_form_content">
+                            <div id="primary_content_wrapper">
+                                <h5 class="primary uppercase">Content</h5>
+                                <input id="content" type="hidden" name="content">
+                                <trix-editor input="content"></trix-editor>
+                            </div>
+                            <div id="image_upload_wrapper">
+                                <label for="image" class="custom-file-upload primary-button">
+                                    Upload Cover Image
+                                    <input type="file" id="image" accept="image/*">
+                                </label>
+
+                                <div id="image_drop_area" class="upload-drop-area">
+                                    <p>...or drag an image here</p>
+                                    <img id="image_preview" class="image-preview" style="display: none;" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="blog_button_wrapper">
+                        <button id="post_close_button" type="button" class="primary-button">Cancel</button>
+                        <button id="post_button" type="submit" class="primary-button">Publish Post</button>
+                    </div>
+                </form>
+
+                <p id="statusMsg" style="font-weight: bold;"></p>
+
+            </div>
+        </div>
+        <script src="https://unpkg.com/trix@2.0.0/dist/trix.umd.min.js"></script>
+        <script type="module" src="js/firebaseSetup.js"></script>
+        <script type="module" src="js/admin.js"></script>
+        <script src="js/fixes.js"></script>
+    </body>
+</html>

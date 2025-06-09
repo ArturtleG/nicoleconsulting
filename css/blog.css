@@ -1,0 +1,305 @@
+#login_wrapper{
+    position: absolute;
+    left: 50%;
+    padding: 20px;
+    background-color: rgba(255, 255, 255, 0.9);
+    border-radius: 8px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    top: 50%;
+    transform: translate(-50%, -50%);
+    width: 400px;
+}
+
+#login_button{
+    float: right;
+}
+
+#new_post_button{
+    position: absolute;
+    top: 20px;
+    right: 20px;
+}
+
+#form_wrapper{
+    margin-top: 10px;
+    width: 90vw;
+    background-color: white;
+    border-radius: 5px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+#form_heading{
+    background-color: var(--color-primary);
+    color: white;
+    padding: 5px 20px;
+    font-size: 1.6em;
+    letter-spacing: .2em;
+    text-transform: uppercase;
+}
+
+#blog_form_content{
+    display: grid;
+    gap: 10px;
+    margin-top: 10px;
+    grid-template-columns: 1fr;
+}
+
+#primary_content_wrapper{
+    padding: 0 20px;
+}
+
+#image_upload_wrapper{
+    display: flex;
+    gap: 20px;
+    align-items: center;
+    justify-content: space-evenly;
+    background-color: #eee;
+    padding: 20px;
+}
+
+#post_form{
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+#post_form input, #post_form textarea {
+    width: 100%;
+    padding: 10px;
+    border:none;
+    border-bottom: 1px solid #ccc;
+    font-family: 'Hubballi', sans-serif;
+    font-size: 1.2em;
+}
+
+#post_form textarea {
+    height: 250px;
+    resize: vertical;
+}
+
+#form_scroll_wrapper{
+    overflow-y: auto;
+    max-height: 77vh;
+}
+
+#form_info{
+    padding: 0 20px;
+}
+/*#post_form button {
+    padding: 10px;
+    background-color: #004c6d;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+#post_form button:hover {
+    background-color: #003f5a;
+}*/
+
+#blog_button_wrapper{
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 10px;
+    gap: 5px;
+    padding: 20px 20px;
+}
+
+label.primary-button{
+    text-align: center;
+}
+
+input[type="file"] {
+  display: none; /* hide the native input */
+}
+
+.custom-file-upload {
+  display: inline-block;
+  padding: 0.5rem 1rem;
+}
+
+.custom-file-upload:hover {
+  background-color: var(--color-primary);
+  color: white;
+}
+
+.upload-drop-area {
+  border: 2px dashed var(--color-accent);
+  padding: 1.5rem;
+  text-align: center;
+  border-radius: 8px;
+  transition: background-color 0.3s ease;
+  background-color: white;
+}
+
+.upload-drop-area.dragover {
+  background-color: rgba(0, 76, 109, 0.1);
+  border-color: var(--color-primary);
+}
+
+.upload-drop-area p{
+    margin: 0;
+}
+
+.image-preview {
+  margin-top: 1rem;
+  max-width: 100%;
+  border-radius: 10px;
+  box-shadow: 0 0 8px rgba(0,0,0,0.1);
+}
+
+.blog_post_wrapper{
+    padding: 20px;
+    border-top :1px solid #ccc;
+}
+
+.blog_tags{
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+    justify-content: center;
+}
+
+.blog_post_wrapper h2{
+    margin-top: 0.5em;
+    margin-bottom: 0.2em;
+    font-family: "Josefin Sans", sans-serif;
+    text-align: center;
+    color: var(--color-primary);
+}
+
+.blog_post_wrapper hr{
+    width: 50px;
+    display: block;
+    margin: auto;
+    margin-bottom: 20px;
+    border-top: 2px solid var(--color-accent);
+}
+
+.blog_tag_button{
+    padding: 2px 8px;
+    text-transform: uppercase;
+}
+
+.blog_cover_image {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  max-height: 50vh;
+  margin: 1rem auto;
+  border-radius: 6px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+}
+
+.blog_date{
+    text-align: center;
+    color: rgba(0, 0, 0, 0.5);
+    font-style: italic;
+    font-family: "Bellota", system-ui;
+}
+
+.blog_content{
+    font-family: "Varela Round", sans-serif;
+    margin: 1em 0;
+}
+
+.blog_content strong{
+    font-weight: 900;
+    text-shadow: #000 0px 0px 1px;
+}
+
+.blog_content > div[style] {
+  width: auto !important;
+}
+
+/* 1b) Make all figures in your rendered post respect the container width */
+.blog_content figure {
+  max-width: 100%;
+  margin: 1em auto;   /* keep your vertical spacing */
+}
+
+/* 1c) And ensure the img itself never overflows its figure */
+.blog_content figure img {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  margin: 0 auto;
+}
+
+/* ------------ */
+/* Trix Overrides */
+/* ------------ */
+
+trix-editor {
+  max-width: 100% !important;
+}
+
+/* Restore default list indentation inside the editor */
+ul, ol {
+  margin: 0.7em 0;      /* add vertical space */
+  padding-left: 1.5em;  /* indent the list */
+  list-style-position: outside;
+}
+
+/* Restore spacing for list items */
+ul li, ol li {
+  margin: 0.3em 0;      /* a little vertical gap between items */
+  margin-left: 0.3em;
+}
+
+ol ol {
+  list-style-type: lower-roman;
+  margin-left: 1.5em;
+}
+
+/* Third‐level ordered list (nested inside a second‐level <ol>) → lower‐alpha */
+ol ol ol {
+  list-style-type: lower-alpha;
+  margin-left: 1.5em;
+  padding-left: 0;
+}
+
+/* Restore blockquote styling inside the editor */
+blockquote {
+  margin: 1em 0;                 /* space above & below */
+  padding-left: 1em;             /* indent the quoted text */
+  border-left: 3px solid #ccc;   /* a visual bar on the left */
+  color: #555;                   /* slightly lighter text */
+  font-style: italic;
+}
+
+/* Restore default paragraph spacing (if you want) */
+trix-editor p {
+  margin: 0.7em 0;
+  line-height: 1.6;
+}
+
+/* Optional: restore default code‐block padding */
+trix-editor pre,
+trix-editor code {
+  background-color: #f6f8fa;
+  padding: 0.3em 0.5em;
+  border-radius: 4px;
+  font-family: Menlo, monospace;
+  margin: 0.5em 0;
+  display: block;
+}
+
+trix-toolbar .trix-button-row {
+    flex-wrap: wrap !important;
+}
+
+#modal{
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}

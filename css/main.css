@@ -133,7 +133,7 @@ h2 {
     margin: var(--spacing) 0;
 }
   
-h3 {
+h3{
     font-family: 'Glass Antiqua', cursive;
     font-size: clamp(1.6rem, 5vw, 2.2rem);
     margin-bottom: 1rem;
@@ -160,6 +160,10 @@ p{
 p:not(:last-child){
     margin-bottom: 1.5rem;
 }
+
+p:only-child {
+  margin-bottom: 0;
+}
   
   /* Button styles share a pattern */
   .primary-button,
@@ -167,7 +171,8 @@ p:not(:last-child){
     display: inline-block;
     text-decoration: none;
     background-color: var(--color-accent);
-    color: var(--color-primary);
+    /*color: var(--color-primary);*/
+    color: white;
     padding: 0.5rem 1rem;
     border-radius: 4px;
     border: 1px solid var(--color-primary);
@@ -267,7 +272,7 @@ p:not(:last-child){
     height: auto;
 }
   
-.hero::before {
+.dots::before {
     content: '';
     position: fixed; top: 0; left: 0;
     width: var(--dots-width); 
@@ -617,7 +622,7 @@ footer .logo{
 }
 
 @media(max-width: 980px){
-    .hero::before {
+    .dots::before {
         width: 40px;
     }
 
@@ -729,7 +734,7 @@ footer .logo{
 }
 
 @media(max-width: 450px){
-    .hero::before {
+    .dots::before {
         width: 30px;
     }
 }
