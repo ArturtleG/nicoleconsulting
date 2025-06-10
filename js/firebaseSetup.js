@@ -1,8 +1,8 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.8.1/firebase-app.js";
 import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.8.1/firebase-analytics.js";
 import { getAuth, GoogleAuthProvider } from "https://www.gstatic.com/firebasejs/11.8.1/firebase-auth.js";
-import { getFirestore, collection, addDoc, serverTimestamp,doc, setDoc, getDoc} from "https://www.gstatic.com/firebasejs/11.8.1/firebase-firestore.js";
-import { getStorage, ref as storageRef, uploadBytes, uploadBytesResumable, getDownloadURL } from "https://www.gstatic.com/firebasejs/11.8.1/firebase-storage.js";
+import { getFirestore, collection, addDoc, serverTimestamp,doc, setDoc, getDoc, deleteDoc} from "https://www.gstatic.com/firebasejs/11.8.1/firebase-firestore.js";
+import { getStorage, ref as storageRef, uploadBytes, uploadBytesResumable, getDownloadURL, listAll, deleteObject } from "https://www.gstatic.com/firebasejs/11.8.1/firebase-storage.js";
 
 // Firebase config
 const firebaseConfig = {
@@ -26,14 +26,17 @@ export const storage = getStorage(app);
 
 
 export {
-  serverTimestamp,
-  doc,
-  setDoc,
-  getDoc,
-  collection,
-  addDoc,
-  storageRef,
-  uploadBytes,
-  uploadBytesResumable,
-  getDownloadURL
+    serverTimestamp,
+    doc,
+    setDoc,
+    getDoc,
+    deleteDoc,
+    collection,
+    addDoc,
+    storageRef,
+    uploadBytes,
+    uploadBytesResumable,
+    getDownloadURL,
+    listAll,
+    deleteObject
 };

@@ -38,7 +38,7 @@
                 <div id="previous_posts"></div>
             </div>
         </section>
-        <div id="modal" style="display: none;">
+        <div id="modal_post_form" class="modal hidden">
             <div id="form_wrapper">
                 <div id="form_heading">New Post</div>
                 <form id="post_form">
@@ -77,8 +77,8 @@
                             </div>
                         </div>
                     </div>
-                    <div id="blog_button_wrapper">
-                        <button id="post_close_button" type="button" class="primary-button">Cancel</button>
+                    <div class="button_wrapper">
+                        <button type="button" class="primary-button close_button">Cancel</button>
                         <button id="post_button" type="submit" class="primary-button">Publish Post</button>
                     </div>
                 </form>
@@ -87,6 +87,19 @@
 
             </div>
         </div>
+
+        <div id="modal_messages" class="modal hidden">
+            <div class="message_wrapper">
+                <div class="messages_heading">Messages</div>
+                <div class="messages_content">
+                    <p class="primary uppercase">No messages yet.</p>
+                </div>
+                <div class="button_wrapper">
+                    <button class="primary-button close_button">Close</button>
+                </div>
+            </div>
+        </div>
+        
         <script src="https://unpkg.com/trix@2.0.0/dist/trix.umd.min.js"></script>
         <script type="module" src="js/firebaseSetup.js"></script>
         <script type="module" src="js/admin.js"></script>

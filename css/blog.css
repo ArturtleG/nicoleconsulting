@@ -99,13 +99,13 @@
     background-color: #003f5a;
 }*/
 
-#blog_button_wrapper{
+/*(#blog_button_wrapper{
     display: flex;
     justify-content: flex-end;
     margin-top: 10px;
     gap: 5px;
     padding: 20px 20px;
-}
+}*/
 
 label.primary-button{
     text-align: center;
@@ -228,6 +228,13 @@ input[type="file"] {
   margin: 0 auto;
 }
 
+.button_wrapper{
+    display: flex;
+    justify-content: end;
+    gap: 10px;
+    margin: 20px;
+}
+
 /* ------------ */
 /* Trix Overrides */
 /* ------------ */
@@ -291,7 +298,7 @@ trix-toolbar .trix-button-row {
     flex-wrap: wrap !important;
 }
 
-#modal{
+.modal{
     position: fixed;
     top: 0;
     left: 0;
@@ -302,4 +309,42 @@ trix-toolbar .trix-button-row {
     justify-content: center;
     align-items: center;
     z-index: 1000;
+    font-size: 1.6em;
+}
+
+
+
+.hidden{
+    display: none;
+}
+
+.modal strong{
+    color: var(--color-primary);
+    text-transform: uppercase;
+    font-family: "Josefin Sans", sans-serif;
+    font-size: .8em;
+    letter-spacing: 0.1em;
+    margin: 0 0.5em;
+}
+
+.modal .message_wrapper{
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    width: 400px;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 20px;
+    overflow: hidden;
+}
+
+.message_wrapper .messages_heading{
+    background-color: var(--color-primary);
+    color: white;
+    padding: 5px 20px;
+    font-size: 1em;
+    letter-spacing: .2em;
+    text-transform: uppercase;
 }
