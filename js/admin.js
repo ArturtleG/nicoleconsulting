@@ -125,7 +125,30 @@ $(function () {
     // --------------------------------------------------
     // C) MODAL SHOW/HIDE FOR “NEW POST”
     // --------------------------------------------------
-    $("#new_post_button").click(function () {
+    $(document).on("click", "#new_post_button", function() {
+        // 1) Heading and button text
+        $("#form_heading").text("New Post");
+        $("#post_button").text("Publish Post");
+
+        // 2) Clear any stored edit state
+        $("#modal_post_form")
+            .removeData("original-slug")
+            .removeData("original-created-at");
+
+        // 3) Reset the form inputs
+        const form = document.getElementById("post_form");
+        form.reset();
+
+        // 4) Clear the Trix editor’s content
+        document.querySelector("trix-editor").editor.loadHTML("");
+
+        // 5) Hide any image preview
+        $("#image").val("");              // reset the file input
+        $("#image_preview")
+            .attr("src", "")                // remove the src attribute
+            .hide();                        // optionally hide the <img> element
+
+        // 6) Show the modal
         $("#modal_post_form").removeClass("hidden");
     });
 
@@ -142,6 +165,11 @@ $(function () {
         event.preventDefault();
         $("#statusMsg").text("Publishing…");
 
+        const $modal            = $("#modal_post_form");
+        const originalSlug      = $modal.data("original-slug")       || null;
+        const originalCreatedAt = $modal.data("original-created-at") || null;
+        const originalImageURL  = $modal.data("original-imageURL")   || null;
+
         // 1) Read & slugify title
         const titleRaw = $("#title").val().trim();
         if (!titleRaw) {
@@ -149,94 +177,103 @@ $(function () {
             return;
         }
 
-        // Slug logic
+        // 2) Slug logic
         let baseSlug = $("#slug").val().trim();
-        baseSlug = baseSlug ? slugify(baseSlug) : slugify(titleRaw);
-        const slug = await ensureUniqueSlug(baseSlug);
+        baseSlug     = baseSlug ? slugify(baseSlug) : slugify(titleRaw);
+
+        //    reuse old slug if unchanged, otherwise generate unique one
+        const slug = originalSlug && originalSlug === baseSlug
+        ? originalSlug
+        : await ensureUniqueSlug(baseSlug);
         $("#slug").val(slug);
 
-        // Tags
+        // 3) Tags
         const tagsRaw = $("#tags").val().trim();
-        const tags    = tagsRaw ? tagsRaw.split(/\s*,\s*/) : [];
+        const tags = tagsRaw
+            ? tagsRaw
+                .split(/\s*,\s*/)    // [ "tag1", "", "tag2", "" ]
+                .filter(tag => tag)  // [ "tag1", "tag2" ]
+            : [];
 
-        // Cover-image file
+        // 4) Cover‐image file
         const coverFile = document.getElementById("image").files[0] || null;
+        let   imageURL  = originalImageURL;
 
         try {
-            let imageURL = null;
-
-            // 2) Upload cover image if present
+            // 5) Upload new cover image if provided
             if (coverFile) {
-            const coverRef = storageRef(storage, `posts/${slug}/cover.jpg`);
-            await uploadBytes(coverRef, coverFile);
-            imageURL = await getDownloadURL(coverRef);
+                const coverRef = storageRef(storage, `posts/${slug}/cover.jpg`);
+                await uploadBytes(coverRef, coverFile);
+                imageURL = await getDownloadURL(coverRef);
             }
 
-            // 3) Upload inline Trix attachments now (instead of on add)
+            // 6) Upload inline Trix attachments all at once
             const trixEditor  = document.querySelector("trix-editor");
             const attachments = trixEditor.editor.getDocument().getAttachments();
             const inlineUploads = [];
 
             attachments.forEach(att => {
                 if (att.file) {
-                    const file = att.file;
-                    // generate unique filename
-                    const ext      = file.name.split(".").pop();
-                    const filename = `${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
-                    const path     = `posts/${slug}/inline-images/${filename}`;
-                    const imgRef   = storageRef(storage, path);
+                const file = att.file;
+                const ext  = file.name.split(".").pop();
+                const filename = `${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
+                const path = `posts/${slug}/inline-images/${filename}`;
+                const imgRef = storageRef(storage, path);
 
-                    // upload + then replace src with real URL
-                    const p = uploadBytes(imgRef, file)
+                const p = uploadBytes(imgRef, file)
                     .then(() => getDownloadURL(imgRef))
-                    .then(url => {
-                        att.setAttributes({ url });   // no href → no <a> wrapper
-                    })
-                    .catch(err => {
-                        console.error("Inline upload failed:", err);
-                    });
+                    .then(url => att.setAttributes({ url }))    // no href → no <a>
+                    .catch(err => console.error("Inline upload failed:", err));
 
-                    inlineUploads.push(p);
+                inlineUploads.push(p);
                 }
             });
-
-            // wait for all inline images to finish uploading
             await Promise.all(inlineUploads);
 
-            // 4) Now grab the final HTML from the Trix hidden input
+            // 7) Grab final HTML
             const contentHtml = $("#content").val();
             if (!contentHtml) {
                 $("#statusMsg").text("Content is required.");
                 return;
             }
 
-            // 5) Build and write the Firestore document
+            // 8) Build post object
             const postData = {
                 title:     titleRaw,
                 slug:      slug,
                 tags:      tags,
                 content:   contentHtml,
                 imageURL:  imageURL,
-                createdAt: serverTimestamp()
+                createdAt: originalCreatedAt || serverTimestamp(),
+                editedAt:  serverTimestamp()
             };
 
+            // 9) Write (or overwrite) the doc
             await setDoc(doc(db, "posts", slug), postData);
 
-            // 6) Success UI
-            $("#statusMsg").text("Post published successfully!");
+            // 10) If the slug was changed, delete the old document
+            if (originalSlug && originalSlug !== slug) {
+                await deleteDoc(doc(db, "posts", originalSlug));
+            }
+
+            // 11) Success UI
+            $("#statusMsg").text("Post saved!");
             this.reset();
-            $previewImg.hide();
+            document.querySelector("trix-editor").editor.loadHTML("");
+            $("#image_preview").attr("src", "").hide();
+
             loadPreviousPosts();
             setTimeout(() => {
-                $("#modal_post_form").fadeOut(200);
+                $modal.addClass("hidden");
                 $("#statusMsg").text("");
             }, 500);
 
-        } catch (error) {
+            } catch (error) {
             console.error("Error publishing post:", error);
             $("#statusMsg").text("Error: " + error.message);
         }
     });
+
 
 
     // E) (OPTIONAL) LOAD AND LIST PREVIOUS POSTS
@@ -279,26 +316,6 @@ $(function () {
                 `);
                 $list.append($post);
             });
-            /*$(".delete-post-btn").on("click", function() {
-                $(".messages_heading").text("");
-                let title = $(this).closest(".blog_post_wrapper").find("h2").text();
-                let slug = $(this).attr("data-slug");
-                $(".messages_content").html(
-                    `Are you sure you want to delete the post <strong>${title}</strong>?
-                    <br><br>This action cannot be undone.`
-                );
-                if(!$("#modal_messages .button_wrapper .delete_button").length) {
-
-                    $("#modal_messages .button_wrapper").append(
-                        `<button class="primary-button delete_button">DELETE</button>`
-                    );
-                    $("#modal_messages .button_wrapper .delete_button").click(function() {
-                        deletPost(slug);
-                        $("#modal_messages").addClass("hidden");
-                    });
-                }
-                $("#modal_messages").removeClass("hidden");
-            });*/
         } catch (err) {
             console.error("Error loading previous posts:", err);
         }
@@ -337,6 +354,57 @@ $(function () {
         // Show the modal
         $("#modal_messages").removeClass("hidden");
     });
+
+    $(document).on("click", ".edit-post-btn", async function(e) {
+        e.preventDefault();
+
+        const slug    = $(this).data("slug");
+        const postRef = doc(db, "posts", slug);
+
+        try {
+            const snap = await getDoc(postRef);
+            if (!snap.exists()) {
+                alert("Post not found!");
+                return;
+            }
+            const data = snap.data();
+
+            // 1) Prefill title, slug, tags
+            $("#title").val(data.title);
+            $("#slug").val(data.slug);
+            $("#tags").val(data.tags.join(", "));
+
+            // 2) Load Trix editor HTML
+            document.querySelector("trix-editor").editor.loadHTML(data.content);
+
+            // 3) Show cover image preview if one exists
+            if (data.imageURL) {
+            $("#image_preview")
+                .attr("src", data.imageURL)
+                .show();
+            } else {
+                $("#image_preview").hide();
+            }
+
+            // 4) Update modal heading & button text
+            $("#form_heading").text("Edit Post");
+            $("#post_button").text("Save Changes");
+
+            // 5) Store original slug, createdAt and imageURL on the modal
+            $("#modal_post_form")
+                .data("original-slug",       slug)
+                .data("original-created-at", data.createdAt)
+                .data("original-imageURL",   data.imageURL || null);
+
+            // 6) Show the modal
+            $("#modal_post_form").removeClass("hidden");
+
+        } catch (err) {
+            console.error("Error loading post for edit:", err);
+            alert("Could not load post data.");
+        }
+    });
+
 
     $(document).on("click", "#modal_confirm", async function(){
         // Hide the modal immediately
