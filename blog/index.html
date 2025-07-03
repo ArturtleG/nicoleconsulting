@@ -32,6 +32,7 @@
         <link rel="preload" as="image" href="../images/portraitCircle.png">
 
         <script src="../js/jquery-3.7.1.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/gsap.min.js"></script>
     </head>
     
     <body class="dots">
@@ -110,7 +111,7 @@
             </footer>
 
             <!-- Modal -->
-            <div id="modal_wrapper" class="no_display">
+            <div id="modal_wrapper">
                 <form id="contact_form" action="" callback="" method="POST" class="no_display" aria-label="Contact Nicole McRee Educational Consulting">
                     <div id="form_heading"></div>
                     <div id="form_message"></div>
@@ -133,6 +134,13 @@
                         <button type="submit" class="cta-button">Submit</button>
                     </div>
                 </form>
+                <div id="modal_message_wrapper" class="no_display">
+                    <h2 id="modal_title"></h2>
+                    <p id="modal_text"></p>
+                    <div class="u-flex-right">
+                        <div class="cta-button modal_close">Close</div>
+                    </div>
+                </div>
             </div>
             <div id="modal_messages" class="modal hidden">
                 <div class="message_wrapper">

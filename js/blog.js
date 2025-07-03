@@ -29,6 +29,12 @@ $(function () {
         //e.preventDefault(); // Prevent default anchor click behavior
         showContactForm();
     });
+
+    $(".modal_close").click(function (e) {
+        console.log("close button clicked");
+        //e.preventDefault(); // Prevent default anchor click behavior
+        closeModal(this);
+    });
     async function loadPreviousPosts(filterTag = null) {
         try {
             const postsCol = collection(db, "posts");
@@ -279,3 +285,81 @@ function showForm(action, header, message, type, response, callback=null) {
     .hide()
     .fadeIn(800);
 }
+
+const callbacks = {
+    showContactButton
+}
+
+function closeModal(buttonClicked) {
+    //modal.addClass("no_display");
+    modal.fadeOut(800);
+    modalMessage.addClass("no_display");
+    modalForm.addClass("no_display");
+    modalForm.each(function() {
+        $(this)[0].reset();
+    })
+
+    console.log("buttonClicked:", buttonClicked);
+
+    let callback = $(buttonClicked).closest("form").attr("callback");
+
+    console.log("closeModal callback:", callback);
+
+    if(callback && callbacks[callback] && typeof callbacks[callback] === 'function') {
+        console.log("Executing callback function:", callback);
+        callbacks[callback].call();
+        $(buttonClicked).closest("form").attr("callback","");
+    }
+}
+
+function showContactButton(){
+    console.log("showContactButton called");
+    //$("#icon_contact").css("opacity", 0).removeClass("no_display");
+    gsap.to(
+        "#icon_contact", 
+        {
+            scale:1.3,
+            duration: .8, 
+            yoyoEase: "easyInOut",
+            yoyo: true, 
+            repeat:1,
+            onComplete() {
+                // remove anything left over on the "style" attribute
+                document.querySelector("#icon_contact")?.removeAttribute("style");
+            }
+        }
+    );
+}
+
+document.addEventListener("DOMContentLoaded", function () {
+    const form = document.querySelector("#modal_wrapper form");
+
+    if (!form) {
+        console.log("Form not found in modal_wrapper.");
+        return;
+    }
+
+    form.addEventListener("submit", function (e) {
+        e.preventDefault(); // stop default form submission so we can handle it manually
+
+        const formData = new FormData(form);
+
+        fetch(form.action, {
+            method: form.method,
+            body: formData,
+            headers: {
+                'Accept': 'application/json'
+            }
+        }).then(response => {
+        if (response.ok) {
+            modalMessage.removeClass("no_display");
+            modalForm.addClass("no_display");
+            form.reset();
+        } else {
+            alert("There was a problem submitting the form. Please try again.");
+        }
+        }).catch(error => {
+            alert("There was a problem submitting the form.");
+        });
+    });
+});
