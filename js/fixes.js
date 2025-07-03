@@ -52,4 +52,31 @@ console.log("fixes.js loaded");
     event.clipboardData.setData("text/plain", plain);
     console.log("    → clipboard contents overwritten with cleaned HTML + text");
   });
+
+  // Remove default filename captions on add & on any change
+document.addEventListener("trix-attachment-add", cleanUpCaptions);
+document.addEventListener("trix-change",      cleanUpCaptions);
+
+function cleanUpCaptions(event) {
+  // `event.target` is the <trix-editor> that just changed
+  const editor = /** @type {HTMLElement} **/ (event.target);
+  editor.querySelectorAll("figure[data-trix-attachment]").forEach((fig) => {
+    // pull the filename out of the JSON stored on the figure
+    let filename = "";
+    try {
+      filename = JSON.parse(fig.getAttribute("data-trix-attachment")).filename || "";
+    } catch (e) {
+      return; // if for some reason it isn’t JSON, skip it
+    }
+
+    const captionEl = fig.querySelector(".attachment__caption");
+    if (!captionEl) return;
+
+    // if all the user sees in that caption is the filename, remove it
+    if (captionEl.textContent.trim() === filename.trim()) {
+      captionEl.remove();
+    }
+  });
+}
+
 })();

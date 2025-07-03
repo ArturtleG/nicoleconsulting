@@ -1,20 +1,26 @@
 let modal = $("#modal_wrapper");
 let modalMessage = $("#modal_message_wrapper");
 let modalForm = $("#modal_wrapper form");
+let modalFormHeader = $("#modal_wrapper #form_heading");
+let modalFormMessage = $("#modal_wrapper #form_message");
 let modalText = $("#modal_text");
 let modalTitle = $("#modal_title");
 let modalTypeForm = $(".type_form");
 
 $(document).ready(function () {
     // Show the modal when the button is clicked
-    $(".contact_button").click(function (e) {
+    $(".contact_button,#icon_contact").click(function (e) {
         //e.preventDefault(); // Prevent default anchor click behavior
-        showForm("https://formspree.io/f/mnndgnqz", "message", "I will get back to you as soon as possible.");
+        showContactForm();
     });
 
     $(".endorse_button").click(function (e) {
         //e.preventDefault(); // Prevent default anchor click behavior
-        showForm("https://formspree.io/f/movdkdby", 
+        showForm(
+            "https://formspree.io/f/movdkdby",
+            "Endorse",
+            `I am honored that you felt moved to endorse my work. 
+            Your endorsement is a powerful way to support my mission and help others discover the impact of my work.`,
             "endorsement", 
             `Thank you for taking the time to share your endorsement. Your voice helps 
             uplift this work. Together, we're building something powerful in education.`
@@ -24,7 +30,7 @@ $(document).ready(function () {
     $(".modal_close").click(function (e) {
         console.log("close button clicked");
         //e.preventDefault(); // Prevent default anchor click behavior
-        closeModal();
+        closeModal(this);
     });
 
     $("#email_link").on("click", function (e) {
@@ -47,7 +53,7 @@ $(document).ready(function () {
 $(function(){
     var $win        = $(window);
     var $heroHeaderWrapper = $('.hero-header-wrapper');
-    var $heroHeader = $('.hero-header');//.hide();
+    //var $heroHeader = $('.hero-header');//.hide();
     var $heroBgs    = $('.hero-background'); 
     var visible     = false;
   
@@ -68,15 +74,11 @@ $(function(){
       var threshold = bgBottom - headerH;
   
       if (!visible && scrollTop >= threshold) {
-        // scroll down past threshold → fade in
-        //$heroHeader.stop(true,true).fadeIn(1000);
         $heroHeaderWrapper.addClass('fade-in');
 
         visible = true;
       }
       else if (visible && scrollTop < threshold) {
-        // scroll up above threshold → fade out
-        //$heroHeader.stop(true,true).fadeOut(1000);
         $heroHeaderWrapper.removeClass('fade-in');
         visible = false;
       }
@@ -84,13 +86,100 @@ $(function(){
   
     $win.on('scroll resize', checkHeroScroll);
     checkHeroScroll();
-  });
+});
 
-function closeModal() {
-    modal.addClass("no_display"); 
+$(function(){
+    var $win        = $(window);
+    var servicesWrapperTop = $('[show_contact]').offset().top;
+    let visible     = false;
+    let scrollEnabled = true;//sessionStorage.getItem('contactAutoShown') !== 'yes';
+  
+    // compute header height once (if it’s static)
+    var headerS = $('#top_menu').outerHeight() || 0;
+
+    var threshold = servicesWrapperTop - headerS;
+  
+    function checkContactScroll(){
+        var scrollTop = $win.scrollTop();
+
+        if (!visible && scrollTop >= threshold && scrollEnabled) {
+            showContactForm();
+            visible = true;
+            sessionStorage.setItem('contactAutoShown', 'yes');
+        }
+        else if (visible && scrollTop < threshold) {
+            //$heroHeaderWrapper.removeClass('fade-in');
+            //visible = false;
+        }
+    }
+  
+    $win.on('scroll resize', checkContactScroll);
+    checkContactScroll();
+});
+
+function showContactForm(){
+    showForm(
+        "https://formspree.io/f/mnndgnqz",
+        "Contact",
+        `<p>
+            Discover more about my work! Below are samples. For a more detailed look, 
+            please send me a message, and I will respond as soon as possible. Thank you 
+            for reaching out!
+        </p>
+        <div class="button_wrapper u-flex-center">
+            <a href="https://drive.google.com/drive/folders/1Prrg3mlEv0TZ6Ha174LWF4ufzyHZMR8n?usp=sharing" target="_blank" class="primary-button">
+                Click for Samples
+            </a>
+        </div>`,
+        "message", 
+        "I will get back to you as soon as possible.",
+        "showContactButton"
+    )
+}
+
+const callbacks = {
+    showContactButton
+}
+
+function closeModal(buttonClicked) {
+    //modal.addClass("no_display");
+    modal.fadeOut(800);
     modalMessage.addClass("no_display");
     modalForm.addClass("no_display");
-    modalForm[0].reset();
+    modalForm.each(function() {
+        $(this)[0].reset();
+    })
+
+    console.log("buttonClicked:", buttonClicked);
+
+    let callback = $(buttonClicked).closest("form").attr("callback");
+
+    console.log("closeModal callback:", callback);
+
+    if(callback && callbacks[callback] && typeof callbacks[callback] === 'function') {
+        console.log("Executing callback function:", callback);
+        callbacks[callback].call();
+        $(buttonClicked).closest("form").attr("callback","");
+    }
+}
+
+function showContactButton(){
+    console.log("showContactButton called");
+    //$("#icon_contact").css("opacity", 0).removeClass("no_display");
+    gsap.to(
+        "#icon_contact", 
+        {
+            scale:1.3,
+            duration: .8, 
+            yoyoEase: "easyInOut",
+            yoyo: true, 
+            repeat:1,
+            onComplete() {
+                // remove anything left over on the "style" attribute
+                document.querySelector("#icon_contact")?.removeAttribute("style");
+            }
+        }
+    );
 }
 
 function showMessage(title, message){
@@ -98,22 +187,42 @@ function showMessage(title, message){
     modalText.html(message);
 
     modalMessage.removeClass("no_display");
-    modal.removeClass("no_display");
+    
+    modal.css("display", "flex")
+        .hide()
+        .fadeIn();
 }
 
 
-function showForm(action, type, response) {
+function showForm(action, header, message, type, response, callback=null) {
     modalForm.attr("action", action);
     modalTypeForm.text(type);
+    modalFormHeader.text(header + " Nicole");
+    modalFormMessage.html(message);
     modalTitle.text("Thank you for sumitting your " + type + ".");
     modalText.text(response);
 
-    modal.removeClass("no_display");
-    modalForm.removeClass("no_display");  
+    console.log("showForm header:", header);
+    console.log("showForm callback:", callback);
+
+    if(callback)
+        modalForm.attr("callback", callback);
+
+    //modal.removeClass("no_display");
+    modalForm.removeClass("no_display");
+
+    modal.css("display", "flex")
+    .hide()
+    .fadeIn(800);
 }
 
 document.addEventListener("DOMContentLoaded", function () {
     const form = document.querySelector("#modal_wrapper form");
+
+    if (!form) {
+        console.log("Form not found in modal_wrapper.");
+        return;
+    }
 
     form.addEventListener("submit", function (e) {
         e.preventDefault(); // stop default form submission so we can handle it manually

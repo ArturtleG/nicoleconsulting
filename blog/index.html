@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+        <meta name="description" content="Nicole McRee is a science consultant offering NGSS-aligned professional learning, instructional coaching, and curriculum design.">
+        
+        <meta property="og:title" content="Nicole McRee Educational Consulting">
+        <meta property="og:image" content="https://mcree-ed.consulting/images/portraitCircle.png">
+        <meta property="og:url" content="https://mcree-ed.consulting/">
+        <meta property="og:type" content="website">
+        <meta property="og:description" content="Nicole McRee is a science consultant offering NGSS-aligned professional learning, instructional coaching, and curriculum design.">
+
+        <meta name="twitter:card" content="summary_large_image">
+        <meta name="twitter:title" content="Nicole McRee Educational Consulting">
+        <meta name="twitter:description" content="Nicole McRee is a science consultant offering NGSS-aligned professional learning, instructional coaching, and curriculum design.">
+        <meta name="twitter:image" content="https://mcree-ed.consulting/images/portraitCircle.png">
+
+        <title>Blogs</title>
+
+        <link rel="canonical" href="https://mcree-ed.consulting/">
+        <link rel="icon" type="image/x-icon" href="../images/Initials.svg">
+        <link rel="stylesheet" href="../css/root.css?v=114" data-version/>
+        <link rel="stylesheet" href="../css/scroll.css" data-version/>
+        <link rel="stylesheet" href="../css/main.css?v=117" data-version/>
+
+        <link rel="stylesheet" href="../css/trix.css" data-version>
+        <link rel="stylesheet" href="../css/blog.css?v=119" data-version/>
+        
+        <link rel="preload" as="image" href="../images/nicoleSplash2_.png">
+        <link rel="preload" as="image" href="../images/portraitCircle.png">
+
+        <script src="../js/jquery-3.7.1.min.js"></script>
+    </head>
+    
+    <body class="dots">
+        <header id="top_menu">
+            <div class="logo">
+                <div class="hero-header-wrapper">
+                    <img class="hero-header" src="../images/portraitCircle.png" alt="Portrait of Nicole McCree" loading="eager"/>
+                </div>
+                <a href="../index.html"><img src="../images/nicoleSignatureWhiteF.svg" alt="Nicole McCree signature logo" loading="eager"/></a>
+            </div>
+            <nav aria-label="Main navigation">
+                <ul>
+                    <li><a href="../index.html#services">Services</a></li>
+                    <li><a href="../index.html#about">About Nicole</a></li>
+                    <li><a href="../index.html#endorsements">Endorsements</a></li>
+                    <li><a href="../index.html#resources">Resources</a></li>
+                    <!--<li><a href="#footer">Contact</a></li>-->
+                </ul>
+            </nav>
+        </header>
+
+        <main>
+            <section class="hero">
+                <div id="hero-wrapper">
+                    <img class="hero-background desktop hero80" src="../images/bloghero.svg" alt="Portrait of Nicole McCree" loading="eager"/>
+                    <img class="hero-background mobile" src="../images/bloghero.svg" alt="Portrait of Nicole McCree" loading="eager"/>
+                    <div class="hero-text">
+                        <h1 class="primary">Welcome to the Blog!</h1>
+                        <p>
+                            Here you'll find stories and reflections on everything from the hidden networks of fungi 
+                            that mirror how kids learn science, to celebrating tomorrow's innovators, to deep dives on 
+                            assessment design and professional learning. Each post invites you to rethink assumptions, spark 
+                            curiosity, and explore discovery-driven teaching.
+                        </p>
+                        <div class="blob smallPadding offwhite primary symbol asterisk_pw">
+                            <p class="special_note">
+                                <strong>Tips:</strong> Click any <em>tag</em> in a post to see only the posts on 
+                                that theme. To return to the full list, clear the filter.
+                            </p>
+                            <p class="special_note">
+                                <img class="h48 img_wrap" src="../images/blogHeart.png">And if you find a post that resonates, heart it and share it with your network! Your support helps me reach 
+                                more educators and continue the conversation about transforming science education.
+                            </p>
+                        </div>
+                        <!--<div class="u-flex-right">
+                            <button class="contact_button primary-button">
+                                Let's Transform Learning Together
+                            </button>
+                        </div>-->
+                    </div>
+                </div>
+            </section>
+
+            <section id="previous_posts_wrapper">
+                <button id="clear_filter" class="primary-button"></button>
+                <div id="previous_posts"></div>
+            </section>
+            <div id="social">
+                <img id="icon_contact" src="../images/icon_conctact.svg" alt="contact logo" loading="lazy"/>
+                <a href="https://www.linkedin.com/in/nicole-mcree-252960320/" target="_blank">
+                    <img src="../images/linkedIn.svg" alt="LinkedIn Logo" loading="eager"/>
+                </a>
+                <a href="https://x.com/NicoleMcBado/" target="_blank">
+                    <img src="../images/x.svg" alt="X Logo" loading="eager"/>
+                </a>
+            </div>
+            <footer id="footer">
+                <div id="logo_wrapper">
+                    <img class="logo" src="../images/Initials.svg" alt="Nicole McRree initials logo" loading="lazy"/>
+                    <div>&copy; 2025 Nicole McRee Consulting. All rights reserved.</div>
+                </div>
+                <a id="email_link" href="mailto:nicole@mcree-ed.consulting" target="_blank">
+                    <img class="emailIcon" src="../images/emailIconW.svg" alt="email icon"  loading="lazy"/>
+                    nicole@mcree-ed.consulting
+                </a>
+            </footer>
+
+            <!-- Modal -->
+            <div id="modal_wrapper" class="no_display">
+                <form id="contact_form" action="" callback="" method="POST" class="no_display" aria-label="Contact Nicole McRee Educational Consulting">
+                    <div id="form_heading"></div>
+                    <div id="form_message"></div>
+                    <div id="form_content">
+                        <label>
+                            Your name:
+                            <input type="text" name="name">
+                        </label>
+                        <label>
+                            Your email:
+                            <input type="email" name="email">
+                        </label>
+                        <label>
+                            Your <span class="type_form"></span>:
+                            <textarea name="message"></textarea>
+                        </label>
+                    </div>
+                    <div id="form_button_wrapper">
+                        <div class="cta-button modal_close">Close</div>
+                        <button type="submit" class="cta-button">Submit</button>
+                    </div>
+                </form>
+            </div>
+            <div id="modal_messages" class="modal hidden">
+                <div class="message_wrapper">
+                    <div class="messages_heading">Messages</div>
+                    <div class="messages_content">
+                        <p class="primary uppercase">No messages yet.</p>
+                    </div>
+                    <div class="button_wrapper">
+                        <button class="primary-button close_button">Close</button>
+                    </div>
+                </div>
+            </div>
+            <div id="notification_banner">
+                <span>A new post has just been published!</span>
+                <div style="display: inline-block; width:150px;">
+                    <button id="load-new-post" class="primary-button">Load it</button>
+                    <button id="dismiss-new-post" class="primary-button">Later</button>
+                </div>
+            </div>
+        </main>
+
+        <script src="https://unpkg.com/trix@2.0.0/dist/trix.umd.min.js"></script>
+        <script type="module" src="../js/firebaseSetup.js?v=115" data-version></script>
+        <!--<script type="module" src="../js/main.js?v=117" data-version></script>-->
+        <script type="module" src="../js/blog.js?v=117" data-version></script>
+        <script src="../js/fixes.js?v=114" data-version></script>
+        <script src="../js/version.js"></script>
+    </body>
+</html>

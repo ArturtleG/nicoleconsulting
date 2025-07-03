@@ -2,18 +2,34 @@
 <html lang="en">
     <head>
         <meta charset="UTF-8">
-        <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+        <meta name="description" content="Nicole McRee is a science consultant offering NGSS-aligned professional learning, instructional coaching, and curriculum design.">
+        
+        <meta property="og:title" content="Nicole McRee Educational Consulting">
+        <meta property="og:image" content="https://mcree-ed.consulting/images/portraitCircle.png">
+        <meta property="og:url" content="https://mcree-ed.consulting/">
+        <meta property="og:type" content="website">
+        <meta property="og:description" content="Nicole McRee is a science consultant offering NGSS-aligned professional learning, instructional coaching, and curriculum design.">
+
+        <meta name="twitter:card" content="summary_large_image">
+        <meta name="twitter:title" content="Nicole McRee Educational Consulting">
+        <meta name="twitter:description" content="Nicole McRee is a science consultant offering NGSS-aligned professional learning, instructional coaching, and curriculum design.">
+        <meta name="twitter:image" content="https://mcree-ed.consulting/images/portraitCircle.png">
+
         <title>Admin Login</title>
+
+        <link rel="canonical" href="https://mcree-ed.consulting/">
         <link rel="icon" type="image/x-icon" href="images/Initials.svg">
-        <link rel="stylesheet" href="css/root.css" data-version/>
-        <link rel="stylesheet" href="css/scroll.css" data-version/>
-        <link rel="stylesheet" href="css/main.css" data-version/>
-        <!--<link rel="stylesheet" href="https://unpkg.com/trix@2.0.0/dist/trix.css">-->
+        <link rel="stylesheet" href="css/root.css?v=100" data-version/>
+        <link rel="stylesheet" href="css/scroll.css?v=100" data-version/>
+        <link rel="stylesheet" href="css/main.css?v=117" data-version/>
+
         <link rel="stylesheet" href="css/trix.css" data-version>
-        <link rel="stylesheet" href="css/blog.css" data-version/>
-        <!--<link rel="preload" as="image" href="images/nicoleSplash2_.png">
-        <link rel="preload" as="image" href="images/portraitCircle.png">-->
+        <link rel="stylesheet" href="css/blog.css?v=117" data-version/>
+        
+        <link rel="preload" as="image" href="images/nicoleSplash2_.png">
+        <link rel="preload" as="image" href="images/portraitCircle.png">
 
         <script src="js/jquery-3.7.1.min.js"></script>
     </head>
@@ -24,7 +40,7 @@
                 <div class="hero-header-wrapper">
                     <img class="hero-header" src="images/portraitCircle.png" alt="Portrait of Nicole McCree" loading="eager"/>
                 </div>
-                <img src="images/nicoleSignatureWhiteF.svg" alt="Nicole McCree signature logo" loading="eager"/>
+                <a href="index.html"><img src="images/nicoleSignatureWhiteF.svg" alt="Nicole McCree signature logo" loading="eager"/></a>
             </div>
             <button id="new_post_button" class="primary-button">New Post</button>
         </header>
@@ -33,11 +49,10 @@
             <h1>Blog Admin Login</h1>
             <button id="login_button" class="primary-button">Sign in with Google</button>
         </div>
+        
         <section id="previous_posts_wrapper" style="display: none;">
-            <div class="row">
-                <h1>Blogs</h1>
-                <div id="previous_posts"></div>
-            </div>
+            <button id="clear_filter" class="primary-button"></button>
+            <div id="previous_posts"></div>
         </section>
         <div id="modal_post_form" class="modal hidden">
             <div id="form_wrapper">
@@ -74,6 +89,9 @@
                                 <div id="image_drop_area" class="upload-drop-area">
                                     <p>...or drag an image here</p>
                                     <img id="image_preview" class="image-preview" style="display: none;" />
+                                    <button id="remove_cover_button" type="button" class="primary-button" style="display:none; margin-top:0.5em;">
+                                        Remove Cover
+                                    </button>
                                 </div>
                             </div>
                         </div>
@@ -102,9 +120,10 @@
         </div>
 
         <script src="https://unpkg.com/trix@2.0.0/dist/trix.umd.min.js"></script>
-        <script type="module" src="js/firebaseSetup.js" data-version></script>
-        <script type="module" src="js/admin.js" data-version></script>
-        <script src="js/fixes.js" data-version></script>
+        <script type="module" src="js/firebaseSetup.js?v=100" data-version></script>
+        <!--<script type="module" src="js/main.js?v=100" data-version></script>-->
+        <script type="module" src="js/admin.js?v=100" data-version></script>
+        <script src="js/fixes.js?v=100" data-version></script>
         <script src="js/version.js"></script>
     </body>
 </html>

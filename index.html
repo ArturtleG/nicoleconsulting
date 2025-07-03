@@ -28,6 +28,7 @@
         <link rel="preload" as="image" href="images/portraitCircle.png">
 
         <script src="js/jquery-3.7.1.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/gsap.min.js"></script>
     </head>
     <body>
         <!-- fixed header -->
@@ -37,7 +38,7 @@
                 <div class="hero-header-wrapper">
                     <img class="hero-header" src="images/portraitCircle.png" alt="Portrait of Nicole McCree" loading="eager"/>
                 </div>
-                <img src="images/nicoleSignatureWhiteF.svg" alt="Nicole McCree signature logo" loading="eager"/>
+                <a href="index.html"><img src="images/nicoleSignatureWhiteF.svg" alt="Nicole McCree signature logo" loading="eager"/></a>
             </div>
             <nav aria-label="Main navigation">
                 <ul>
@@ -45,7 +46,7 @@
                     <li><a href="#about">About Nicole</a></li>
                     <li><a href="#endorsements">Endorsements</a></li>
                     <li><a href="#resources">Resources</a></li>
-                    <li><a href="#footer">Contact</a></li>
+                    <!--<li><a href="#footer">Contact</a></li>-->
                 </ul>
             </nav>
         </header>
@@ -54,7 +55,7 @@
             <!-- hero desktop -->
             <section class="hero dots">
                 <div id="hero-wrapper">
-                    <img class="hero-background desktop" src="images/nicoleSplash2_.png" alt="Portrait of Nicole McCree" loading="eager"/>
+                    <img class="hero-background desktop hero60" src="images/nicoleSplash2_.png" alt="Portrait of Nicole McCree" loading="eager"/>
                     <img class="hero-background mobile" src="images/portraitCircle.png" alt="Portrait of Nicole McCree" loading="eager"/>
                     <div class="hero-text">
                         <h1 class="primary">Hi… I'm Nicole:</h1>
@@ -77,7 +78,7 @@
             <!-- services -->
             <section id="services"  class="dark">
                 <div class="row">
-                    <h2>Services</h2>
+                    <h2>Ways We Can Work Together</h2>
                 </div>
 
                 <div id="services_text" class="row">
@@ -118,7 +119,7 @@
                     </div>
                 </div>
                 <div class="row">
-                    <h2>Options</h2>
+                    <h2>Flexible Professional Development Options</h2>
                 </div>
                 
                 <div id="services_options" class="row">
@@ -145,7 +146,7 @@
                     </div>
                 </div>
                 <div class="row">
-                    <h2>Topics</h2>
+                    <h2>Featured Professional Learning Topics & Science Education Support</h2>
                 </div>
                 <div id="services_topics" class="row">
                     <div class="blob white">
@@ -182,7 +183,7 @@
                         </ul>
                     </div>
                     <div class="blob white">
-                        <h4 class="uppercase primary">Curriculum Coherence in K-8 Science</h4>
+                        <h4 class="uppercase primary">Building Coherent K-8 Curriculum Aligned to NGSS</h4>
                         <ul>
                             <li>
                                 This support helps districts build a clear, connected approach to K-8 science by 
@@ -192,6 +193,11 @@
                                 and meaningful sensemaking. This offering can be adapted for both standards-based 
                                 systems and traditional frameworks, meeting schools where they are while guiding 
                                 them toward stronger instructional alignment.
+                            </li>
+                            <li>
+                                This service is ideal for districts looking to align instruction with the Next
+                                Generation Science Standards (NGSS) and ensure consistent, three-dimensional 
+                                learning experiences across grade levels.
                             </li>
                         </ul>
                     </div>
@@ -213,7 +219,7 @@
                             </li>
                         </ul>
                     </div>
-                    <div class="blob white">
+                    <div class="blob white" show_contact>
                         <h4 class="uppercase primary">Assessments Aligned to 3D NGSS and ISA Readiness</h4>
                         <ul>
                             <li>
@@ -273,14 +279,16 @@
 
             <!-- about -->
             <section id="about">
-                <div class="row"><h2>About Nicole</h2></div>
+                <div class="row"><h2>Meet Nicole: Science Curriculum & Instructional Specialist</h2></div>
                 <div id="about_text" class="row">
                     <p>
-                        I'm a passionate educator who believes all students deserve 
-                        learning experiences that are meaningful. Over the past 20 years, 
-                        I've worn many hats, yet in every role, I've stayed focused on what 
-                        matters most: helping students think deeply, wonder freely, and 
-                        feel seen in their learning.
+                        I'm a passionate educator who believes all students deserve learning
+                        experiences that are meaningful. Over the past 20 years, I've worn many 
+                        hats. From teaching to leading NGSS-aligned professional learning, I've 
+                        stayed focused on what matters most: helping teachers create customized 
+                        learning opportunities that allow students to think deeply, wonder 
+                        freely, and feel seen in their learning. I aim to support schools in 
+                        creating impactful, equitable, and engaging science instruction.
                     </p>
                     <p>
                         I know how challenging and rewarding this work can be. That's why 
@@ -296,6 +304,9 @@
                         and teachers can thrive. Let's build something great…. Together!
                     </p>
                 </div>
+
+                <h2 class="row">Experience in Science Education, Coaching, and NGSS Implementation</h2>
+                
                 <div id="accolades" class="row">
                     <div id="featured" class="blob primary_back">
                         <h4 class="uppercase">Featured Speaker</h4>
@@ -334,12 +345,13 @@
                             <li>Science Multi-district Curriculum Alignment Facilitator</li>
                             <li>STEM Conference for Girls: Lake County Board Member</li>
                             <li>Foundation46 Committee Member</li>
+                            <li>Led district-wide NGSS science training initiatives</li>
+                            <li>Designed three-dimensional assessments aligned to OpenSciEd and NGSS</li>
                         </ul>
                     </div>
                 </div>
 
                 <div class="row u-flex-column">
-                    <h2>Experience</h2>
                     <div class="blob primary_back">
                         <h4 class="uppercase">Education</h4>
                         <br>
@@ -376,7 +388,7 @@
 
             <section id="endorsements" class="dark">
                 <div class="row">
-                    <h2>Endorsements</h2>
+                    <h2>Voices From Educators & Leaders</h2>
                 </div>
                 <div id="endorsements_text" class="row flex_wrap">
                     <article class="blob primary_back symbol quote" itemprop="review">
@@ -439,7 +451,7 @@
 
             <section id="resources">
                 <div class="row">
-                    <h2>Resources</h2>
+                    <h2>Science Education Tools & Insights</h2>
                 </div>
                 <div id="resources_text" class="row flex_wrap">
                     <p>
@@ -454,6 +466,10 @@
                 </div>
             </section>
             <div id="social">
+                <img id="icon_contact" src="images/icon_conctact.svg" alt="contact logo" loading="lazy"/>
+                <a href="blog/">
+                    <img src="images/blog.svg" alt="LinkedIn Logo" loading="eager"/>
+                </a>
                 <a href="https://www.linkedin.com/in/nicole-mcree-252960320/" target="_blank">
                     <img src="images/linkedIn.svg" alt="LinkedIn Logo" loading="eager"/>
                 </a>
@@ -473,21 +489,24 @@
             </footer>
 
             <!-- Modal -->
-            <div id="modal_wrapper" class="no_display">
-                <form action="" method="POST" class="no_display" aria-label="Contact Nicole McRee Educational Consulting">
-                    <label>
-                        Your name:
-                        <input type="text" name="name">
-                    </label>
-                    <label>
-                        Your email:
-                        <input type="email" name="email">
-                    </label>
-                    <label>
-                        Your <span class="type_form"></span>:
-                        <textarea name="message"></textarea>
-                    </label>
-                    <!-- your other form fields go here -->
+            <div id="modal_wrapper">
+                <form id="contact_form" action="" callback="" method="POST" class="no_display" aria-label="Contact Nicole McRee Educational Consulting">
+                    <div id="form_heading"></div>
+                    <div id="form_message"></div>
+                    <div id="form_content">
+                        <label>
+                            Your name:
+                            <input type="text" name="name">
+                        </label>
+                        <label>
+                            Your email:
+                            <input type="email" name="email">
+                        </label>
+                        <label>
+                            Your <span class="type_form"></span>:
+                            <textarea name="message"></textarea>
+                        </label>
+                    </div>
                     <div id="form_button_wrapper">
                         <div class="cta-button modal_close">Close</div>
                         <button type="submit" class="cta-button">Submit</button>

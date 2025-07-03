@@ -18,15 +18,17 @@ import {
     uploadBytesResumable,
     getDownloadURL,
     listAll,
-    deleteObject
+    deleteObject,
+    query, 
+    where, 
+    orderBy, 
+    getDocs
 } from "./firebaseSetup.js";
 
 import {
     signInWithPopup,
     onAuthStateChanged
 } from "https://www.gstatic.com/firebasejs/11.8.1/firebase-auth.js";
-
-import { getDocs, query, orderBy } from "https://www.gstatic.com/firebasejs/11.8.1/firebase-firestore.js";
 
 
 // 2) WRAP EVERYTHING IN A JQUERY READY CALLBACK
@@ -125,36 +127,31 @@ $(function () {
     // --------------------------------------------------
     // C) MODAL SHOW/HIDE FOR “NEW POST”
     // --------------------------------------------------
-    $(document).on("click", "#new_post_button", function() {
-        // 1) Heading and button text
-        $("#form_heading").text("New Post");
-        $("#post_button").text("Publish Post");
-
-        // 2) Clear any stored edit state
-        $("#modal_post_form")
-            .removeData("original-slug")
-            .removeData("original-created-at");
-
-        // 3) Reset the form inputs
-        const form = document.getElementById("post_form");
-        form.reset();
-
-        // 4) Clear the Trix editor’s content
+    $("#new_post_button").click(function () {
+        // reset the HTML form
+        $("#post_form")[0].reset();
+        // clear the trix editor
         document.querySelector("trix-editor").editor.loadHTML("");
 
-        // 5) Hide any image preview
-        $("#image").val("");              // reset the file input
-        $("#image_preview")
-            .attr("src", "")                // remove the src attribute
-            .hide();                        // optionally hide the <img> element
+        // hide any old cover-preview
+        $("#image_preview").hide();
 
-        // 6) Show the modal
+        // clear any “original-…” data so we know this is truly a CREATE
+        $("#modal_post_form")
+        .removeClass("hidden")
+            .data({
+                "original-slug":         null,
+                "original-created-at":   null,
+                "original-image-url":    null,
+                "original-cover-path":   null,
+                "hearts":                   0,
+                "remove-cover":          false
+            });
+
+        // reset headings/buttons
+        $("#form_heading").text("New Post");
+        $("#post_button").text("Publish Post");
         $("#modal_post_form").removeClass("hidden");
-    });
-
-    $(".close_button").click(function () {
-        console.log("Close button clicked");
-        $(this).closest(".modal").addClass("hidden");
     });
 
 
@@ -165,12 +162,15 @@ $(function () {
         event.preventDefault();
         $("#statusMsg").text("Publishing…");
 
-        const $modal            = $("#modal_post_form");
-        const originalSlug      = $modal.data("original-slug")       || null;
-        const originalCreatedAt = $modal.data("original-created-at") || null;
-        const originalImageURL  = $modal.data("original-imageURL")   || null;
+        const $modal = $("#modal_post_form");
+        const originalSlug       = $modal.data("original-slug")       || null;
+        const originalCreatedAt  = $modal.data("original-created-at")  || null;
+        const originalImageURL   = $modal.data("original-image-url")   || null;
+        const originalImagePath  = $modal.data("original-image-path")  || null;
+        const hearts             = $modal.data("hearts") || 0; 
+        const removeCover        = !!$modal.data("remove-cover");      // true if user clicked “Remove Cover”
 
-        // 1) Read & slugify title
+        // 1) Title
         const titleRaw = $("#title").val().trim();
         if (!titleRaw) {
             $("#statusMsg").text("Title is required.");
@@ -179,54 +179,64 @@ $(function () {
 
         // 2) Slug logic
         let baseSlug = $("#slug").val().trim();
-        baseSlug     = baseSlug ? slugify(baseSlug) : slugify(titleRaw);
-
-        //    reuse old slug if unchanged, otherwise generate unique one
-        const slug = originalSlug && originalSlug === baseSlug
-        ? originalSlug
-        : await ensureUniqueSlug(baseSlug);
+        baseSlug = baseSlug ? slugify(baseSlug) : slugify(titleRaw);
+        const slug = (originalSlug === baseSlug)
+            ? originalSlug
+            : await ensureUniqueSlug(baseSlug);
         $("#slug").val(slug);
 
-        // 3) Tags
+        // 3) Tags array
         const tagsRaw = $("#tags").val().trim();
         const tags = tagsRaw
-            ? tagsRaw
-                .split(/\s*,\s*/)    // [ "tag1", "", "tag2", "" ]
-                .filter(tag => tag)  // [ "tag1", "tag2" ]
+            ? tagsRaw.toLowerCase().split(/\s*,\s*/).filter(tag => tag)
             : [];
 
-        // 4) Cover‐image file
+        // 4) Cover‐image file input
         const coverFile = document.getElementById("image").files[0] || null;
-        let   imageURL  = originalImageURL;
+        // where we store all covers
+        const coverPath = `posts/${slug}/cover.jpg`;
+
+        let imageURL = null;
 
         try {
-            // 5) Upload new cover image if provided
+            // 5a) New file chosen → upload it, update URL & path on modal
             if (coverFile) {
-                const coverRef = storageRef(storage, `posts/${slug}/cover.jpg`);
+                const coverRef = storageRef(storage, coverPath);
                 await uploadBytes(coverRef, coverFile);
                 imageURL = await getDownloadURL(coverRef);
+                $modal
+                    .data("original-image-url",  imageURL)
+                    .data("original-image-path", coverPath)
+                    .removeData("remove-cover");
+
+                // 5b) Editing + “Remove Cover” clicked + had an old cover → delete it
+            } else if (originalSlug && removeCover && originalImagePath) {
+                await deleteObject(storageRef(storage, originalImagePath));
+                imageURL = null;
+                $modal.removeData("original-image-url original-image-path remove-cover");
+
+                // 5c) Editing + no new file + didn’t remove → keep old URL
+            } else if (originalSlug) {
+                imageURL = originalImageURL;
             }
 
-            // 6) Upload inline Trix attachments all at once
-            const trixEditor  = document.querySelector("trix-editor");
-            const attachments = trixEditor.editor.getDocument().getAttachments();
+            // 6) Inline Trix attachments: upload any new ones and rewrite their URLs
+            const trixEditor   = document.querySelector("trix-editor");
             const inlineUploads = [];
-
-            attachments.forEach(att => {
-                if (att.file) {
-                const file = att.file;
-                const ext  = file.name.split(".").pop();
+            trixEditor.editor.getDocument().getAttachments().forEach(att => {
+            if (att.file) {
+                const file     = att.file;
+                const ext      = file.name.split(".").pop();
                 const filename = `${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
-                const path = `posts/${slug}/inline-images/${filename}`;
-                const imgRef = storageRef(storage, path);
-
-                const p = uploadBytes(imgRef, file)
+                const path     = `posts/${slug}/inline-images/${filename}`;
+                const imgRef   = storageRef(storage, path);
+                inlineUploads.push(
+                uploadBytes(imgRef, file)
                     .then(() => getDownloadURL(imgRef))
-                    .then(url => att.setAttributes({ url }))    // no href → no <a>
-                    .catch(err => console.error("Inline upload failed:", err));
-
-                inlineUploads.push(p);
-                }
+                    .then(url => att.setAttributes({ url }))
+                    .catch(err => console.error("Inline upload failed:", err))
+                );
+            }
             });
             await Promise.all(inlineUploads);
 
@@ -237,92 +247,152 @@ $(function () {
                 return;
             }
 
-            // 8) Build post object
+            // 8) Build the Firestore payload
             const postData = {
                 title:     titleRaw,
-                slug:      slug,
-                tags:      tags,
+                slug,
+                tags,
                 content:   contentHtml,
-                imageURL:  imageURL,
+                imageURL,
                 createdAt: originalCreatedAt || serverTimestamp(),
-                editedAt:  serverTimestamp()
+                editedAt:  serverTimestamp(),
+                hearts
             };
 
-            // 9) Write (or overwrite) the doc
+            // 9) Write (or overwrite) the document
             await setDoc(doc(db, "posts", slug), postData);
 
-            // 10) If the slug was changed, delete the old document
+            // 10) If slug changed, delete the old doc
             if (originalSlug && originalSlug !== slug) {
                 await deleteDoc(doc(db, "posts", originalSlug));
             }
 
-            // 11) Success UI
+            // 11) UI feedback & cleanup
             $("#statusMsg").text("Post saved!");
             this.reset();
             document.querySelector("trix-editor").editor.loadHTML("");
             $("#image_preview").attr("src", "").hide();
-
+            $("#remove_cover_button").hide();
             loadPreviousPosts();
+
             setTimeout(() => {
                 $modal.addClass("hidden");
                 $("#statusMsg").text("");
             }, 500);
 
-            } catch (error) {
+        } catch (error) {
             console.error("Error publishing post:", error);
             $("#statusMsg").text("Error: " + error.message);
         }
     });
 
-
-
     // E) (OPTIONAL) LOAD AND LIST PREVIOUS POSTS
   
-    async function loadPreviousPosts() {
+    async function loadPreviousPosts(filterTag = null) {
         try {
             const postsCol = collection(db, "posts");
-            const q = query(postsCol, orderBy("createdAt", "desc"));
+            let q;
+
+            if (filterTag) {
+                // only posts whose tags array contains filterTag
+                q = query(
+                    postsCol,
+                    where("tags", "array-contains", filterTag),
+                    orderBy("createdAt", "desc")
+                );
+            } else {
+                // all posts
+                q = query(postsCol, orderBy("createdAt", "desc"));
+            }
+
             const snapshot = await getDocs(q);
-            const $list = $("#previous_posts");
+            const $list    = $("#previous_posts");
             $list.empty();
 
+            let postNum = 0;
+
             snapshot.forEach(docSnap => {
+                postNum++;
                 const data = docSnap.data();
                 const slug = docSnap.id;
-                const title = data.title;
-                const tags = processTags(data.tags);
-                const date = data.createdAt ? data.createdAt.toDate().toLocaleDateString() : "no date";
-                const content = data.content || "no content";
-                const coverImg = data.imageURL ?
-                    `<img class="blog_cover_image" src="${data.imageURL}" alt="Cover image for ${title}">` : "";
-                const $post = $(`
-                <div class="blog_post_wrapper">
-                    <div class="blog_tags">${tags}</div>
-                    ${coverImg}
-                    <h2>${title}</h2>
-                    <hr>
-                    <div class="blog_date">Posted on ${date}</div>
-                    <div class="blog_content">${content}</div>
-                    <div class="button_wrapper">
-                        <button class="delete-post-btn primary-button" data-slug="${slug}">
-                            delete
-                        </button>
+                const tags = data.tags || [];
 
-                        <button class="edit-post-btn primary-button" data-slug="${slug}">
-                            edit
-                        </button>
-                    </div>
-                </div>
+                // build tag buttons
+                const tagsHtml = tags
+                    .map(tag => `<button 
+                                    class="blog_tag_button primary-button" 
+                                    data-tag="${tag}">
+                                    ${tag}
+                                </button>`)
+                    .join("");
+
+                const coverImg = data.imageURL
+                    ? `<div class="blog_cover_image_wrapper"><img class="blog_cover_image" src="${data.imageURL}" alt=""></div>`
+                    : "";
+
+                let month = "", day = "", year = "";
+
+                if (data.createdAt) {
+                    const dt = data.createdAt.toDate();
+                    month = dt.toLocaleString("en-US", { month: "short" }); // e.g. "Jun"
+                    day   = String(dt.getDate()).padStart(2, "0");                        // e.g. "16"
+                    year  = dt.getFullYear().toString();                    // e.g. "2025"
+                } else {
+                // fallback
+                    month = day = year = "";
+                }
+
+                let rowCol = postNum % 2 === 0 ? "even" : "odd";
+
+                const $post = $(`
+                    <section class="${rowCol}">
+                        <div class="blog_post_wrapper row white">
+                            <div class="blog_header">
+                                <div class="blog_date_wrapper">
+                                    <div class="blog_month">${month}</div>
+                                    <div class="blog_day">${day}</div>
+                                    <div class="blog_year">${year}</div>
+                                </div>
+                                <h2>${data.title}</h2>
+                            </div>
+                            ${coverImg}
+                            <hr>
+                            <div class="blog_tags">${tagsHtml}</div>
+                            <hr>
+                            <div class="blog_content_wrapper">
+                                <div class="blog_content">${data.content}</div>
+                            </div>
+                            <div class="button_wrapper">
+                                <button class="edit-post-btn primary-button" data-slug="${slug}">
+                                    edit
+                                </button>
+                                <button class="delete-post-btn primary-button" data-slug="${slug}">
+                                    delete
+                                </button>
+                            </div>
+                        </div>
+
+                    </section>
                 `);
+
                 $list.append($post);
             });
+            return postNum; // return the number of posts loaded
+
         } catch (err) {
-            console.error("Error loading previous posts:", err);
+            console.error("Error loading posts:", err);
         }
     }
+
   
     // Call it once on page load (after auth state is determined)
     loadPreviousPosts();
+
+    //$("#clear_filter").on("click", () => loadPreviousPosts());
+     $("#clear_filter").click(function(){
+        loadPreviousPosts();
+        $(this).fadeOut(800);
+    });
 
     // Open the “are you sure?” modal when any delete‐post button is clicked
     $(document).on("click", ".delete-post-btn", function() {
@@ -374,30 +444,38 @@ $(function () {
             $("#slug").val(data.slug);
             $("#tags").val(data.tags.join(", "));
 
+            console.log("hearts:", data.hearts);
+
             // 2) Load Trix editor HTML
             document.querySelector("trix-editor").editor.loadHTML(data.content);
 
-            // 3) Show cover image preview if one exists
+            // 3) Show or hide the current cover + remove button
             if (data.imageURL) {
-            $("#image_preview")
-                .attr("src", data.imageURL)
-                .show();
+                $("#image_preview").attr("src", data.imageURL).show();
+                $("#remove_cover_button").show();
             } else {
                 $("#image_preview").hide();
+                $("#remove_cover_button").hide();
             }
 
-            // 4) Update modal heading & button text
+            // 4) Store everything we need for submit time
+            const $modal = $("#modal_post_form");
+            $modal
+            .data("original-slug",        slug)
+            .data("original-created-at",  data.createdAt)
+            .data("original-image-url",   data.imageURL || null)
+            .data("original-image-path",  data.imageURL ? `posts/${slug}/cover.jpg` : null)
+            .data("hearts",               data.hearts || 0) // default to 0 if not set
+            .data("remove-cover",         false);
+
+            console.log("Modal data:", $modal.data("hearts"));
+
+            // 5) Update UI text
             $("#form_heading").text("Edit Post");
             $("#post_button").text("Save Changes");
 
-            // 5) Store original slug, createdAt and imageURL on the modal
-            $("#modal_post_form")
-                .data("original-slug",       slug)
-                .data("original-created-at", data.createdAt)
-                .data("original-imageURL",   data.imageURL || null);
-
             // 6) Show the modal
-            $("#modal_post_form").removeClass("hidden");
+            $modal.removeClass("hidden");
 
         } catch (err) {
             console.error("Error loading post for edit:", err);
@@ -418,12 +496,36 @@ $(function () {
         loadPreviousPosts();
     });
 
+    $(".close_button").click(function () {
+        console.log("Close button clicked");
+        $(this).closest(".modal").addClass("hidden");
+    });
+
+    $("#remove_cover_button").click(function(e){
+        e.preventDefault(); 
+        
+        $("#image").val("");
+        
+        $("#image_preview").hide();
+        $(this).hide();
+
+        $("#modal_post_form").data("remove-cover", true);
+
+    });
+
+    $(document).on("click", ".blog_tag_button", async function() {
+        const tag = $(this).data("tag");
+        const numPosts = await loadPreviousPosts(tag);
+        console.log("filter button fading in");
+        $("#clear_filter").text(`${tag} (${numPosts})`).fadeIn(800);
+    });
+
 }); // end of $(function())
 
 function processTags(input) {
     let tagHTML = "";
     for (let i = 0; i < input.length; i++) {
-        tagHTML += `<button class="blog_tag_button primary-button">${input[i]}</button>`;
+        tagHTML += `<button type="button" class="blog_tag_button primary-button">${input[i]}</button>`;
     }
     return tagHTML;
 }

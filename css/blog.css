@@ -14,11 +14,11 @@
     float: right;
 }
 
-#new_post_button{
+/*#new_post_button{
     position: absolute;
     top: 20px;
     right: 20px;
-}
+}*/
 
 #form_wrapper{
     margin-top: 10px;
@@ -150,20 +150,87 @@ input[type="file"] {
   box-shadow: 0 0 8px rgba(0,0,0,0.1);
 }
 
+#clear_filter{
+    position: fixed;
+    top: calc(var(--header-height) + 10px);
+    right: 10px;
+    z-index: 2000;
+    text-transform: uppercase;
+    padding-right: 2.4em;
+    opacity: 0.9;
+    display: none;
+}
+
+#clear_filter::after {
+    content: "Ⓧ";                  /* U+00D7 multiplication sign */
+    position: absolute;
+    right: 0.6em;                  /* tweak to taste */
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 1.2em;              /* icon size */
+    color: inherit;                /* match the button text color */
+    pointer-events: none;          /* clicks go through to the button */
+}
+
+.even{
+    background-color: #f9f9f9;
+}
+
+.odd{
+    background-color: #000;
+}
+
 #previous_posts{
     display: flex;
     flex-direction: column;
-    gap: 20px;
-    margin-top: 20px;
-    background-color: black;
-    padding: 20px;
-    border-radius: 12px;
+    /*padding: 20px 40px;
+    border-radius: 15px;
+    border: 1px solid #ccc;*/
 }
 
 .blog_post_wrapper{
-    padding: 20px;
     border-radius: 8px;
     background-color:white;
+}
+
+.blog_header{
+    display: grid;
+    grid-template-columns: 90px 1fr;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    gap: 20px;
+    border-radius: 8px;
+    width: 100%;
+}
+
+.blog_date_wrapper{
+    /*font-family: "Philosopher", sans-serif;*/
+    font-family: "Josefin Sans", sans-serif;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-direction: column;
+    background-color: var(--color-primary);
+    color: white;
+    padding: 10px;
+    width: 90px;
+    border-radius: 8px;;
+}
+
+.blog_date_wrapper .blog_month, .blog_date_wrapper .blog_year{
+    font-size: 20px;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+}
+
+.blog_date_wrapper .blog_year{
+    margin-top: -10px;
+}
+
+.blog_date_wrapper .blog_day{
+    font-size: 60px;
+    line-height: 1;
 }
 
 .blog_tags{
@@ -171,10 +238,27 @@ input[type="file"] {
     flex-wrap: wrap;
     gap: 5px;
     justify-content: center;
+    padding: 0 20px;
+}
+
+.blog_content{
+    padding: 0 20px;
+    font-size: clamp(1rem, calc(.8rem + 0.15vw), 1.15rem);
+    font-family: "Varela Round", sans-serif;
+    margin: 1em 0;
+}
+
+strong{
+    font-weight: 900;
+    font-family: "Josefin Sans", sans-serif;
+    font-size: 1.15em;
+}
+
+.blog_content > div[style] {
+  width: auto !important;
 }
 
 .blog_post_wrapper h2{
-    margin-top: 0.5em;
     margin-bottom: 0.2em;
     font-family: "Josefin Sans", sans-serif;
     text-align: center;
@@ -185,7 +269,7 @@ input[type="file"] {
     width: 50px;
     display: block;
     margin: auto;
-    margin-bottom: 20px;
+    margin: 20px auto;
     border-top: 2px solid var(--color-accent);
 }
 
@@ -194,36 +278,51 @@ input[type="file"] {
     text-transform: uppercase;
 }
 
+.blog_heart_button{
+    width: 32px;
+    height: 32px;
+    background-image: url("../images/blogHeart.svg");
+    transition: transform 0.2s ease-in-out;
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    border: none;
+}
+
+.blog_heart_button:hover{
+    transform: scale(1.1);
+    transition: transform 0.2s ease-in-out;
+    background-image: url("../images/blogHeartFilled.svg");
+    cursor: pointer;
+}
+
+.blog_heart_num{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    
+    
+    font-family: "Hubballi", sans-serif;
+    font-family: "Courier Prime", monospace;
+    background-color: var(--color-primary);
+    color: white;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+}
+
+.blog_cover_image_wrapper {
+    background-color: black;
+}
+
 .blog_cover_image {
-  display: block;
-  max-width: 100%;
-  height: auto;
-  max-height: 50vh;
-  margin: 1rem auto;
-  border-radius: 6px;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-}
-
-.blog_date{
-    text-align: center;
-    color: rgba(0, 0, 0, 0.5);
-    font-style: italic;
-    font-family: "Bellota", system-ui;
-}
-
-.blog_content{
-    font-family: "Varela Round", sans-serif;
-    font-size: 1.2em;
-    margin: 1em 0;
-}
-
-.blog_content strong{
-    font-weight: 900;
-    font-family: "Josefin Sans", sans-serif;
-}
-
-.blog_content > div[style] {
-  width: auto !important;
+    display: block;
+    max-width: 100%;
+    height: auto;
+    max-height: 70vh;
+    margin: 0 auto;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
 }
 
 /* 1b) Make all figures in your rendered post respect the container width */
@@ -235,16 +334,30 @@ input[type="file"] {
 /* 1c) And ensure the img itself never overflows its figure */
 .blog_content figure img {
   display: block;
-  max-width: 100%;
-  height: auto;
   margin: 0 auto;
 }
 
 .button_wrapper{
     display: flex;
     justify-content: end;
+    align-items: center;
     gap: 10px;
     margin: 20px;
+}
+
+.small_gap{
+    gap: 2px;
+}
+
+#image_drop_area{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+#image_drop_area img{
+    max-height: 50vh;
 }
 
 /* ------------ */
@@ -256,14 +369,14 @@ trix-editor {
 }
 
 /* Restore default list indentation inside the editor */
-ul, ol {
+trix-editor ul, trix-editor ol, .blog_content ul, .blog_content ol {
   margin: 0.7em 0;      /* add vertical space */
   padding-left: 1.5em;  /* indent the list */
   list-style-position: outside;
 }
 
 /* Restore spacing for list items */
-ul li, ol li {
+trix-editor ul li, trix-editor ol li, .blog_content ul li, .blog_content ol li {
   margin: 0.3em 0;      /* a little vertical gap between items */
   margin-left: 0.3em;
 }
@@ -331,11 +444,8 @@ trix-toolbar .trix-button-row {
 
 .modal strong{
     color: var(--color-primary);
-    text-transform: uppercase;
     font-family: "Josefin Sans", sans-serif;
     font-size: .8em;
-    letter-spacing: 0.1em;
-    margin: 0 0.5em;
 }
 
 .modal .message_wrapper{
@@ -359,4 +469,16 @@ trix-toolbar .trix-button-row {
     font-size: 1em;
     letter-spacing: .2em;
     text-transform: uppercase;
+}
+
+@media (max-width: 850px) {
+    #clear_filter{
+        top: calc(var(--header-height-m) + 10px);
+    }
+}
+
+@media (max-width: 500px) {
+    #previous_posts .row{
+        width: 90%;
+    }
 }
