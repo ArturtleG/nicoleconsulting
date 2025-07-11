@@ -1,16 +1,17 @@
-let modal = $("#modal_wrapper");
-let modalMessage = $("#modal_message_wrapper");
-let modalForm = $("#modal_wrapper form");
-let modalFormHeader = $("#modal_wrapper #form_heading");
-let modalFormMessage = $("#modal_wrapper #form_message");
-let modalText = $("#modal_text");
-let modalTitle = $("#modal_title");
-let modalTypeForm = $(".type_form");
+let modal             = $("#modal_wrapper");
+let modalMessage      = $("#modal_message_wrapper");
+let modalForm         = $("#modal_wrapper form");
+let modalFormHeader   = $("#modal_wrapper #form_heading");
+let modalFormMessage  = $("#modal_wrapper #form_message");
+let modalText         = $("#modal_text");
+let modalTitle        = $("#modal_title");
+let modalTypeForm     = $(".type_form");
+let modalCloseButtons = $(".modal_close");
 
 $(document).ready(function () {
     // Show the modal when the button is clicked
     $(".contact_button,#icon_contact").click(function (e) {
-        //e.preventDefault(); // Prevent default anchor click behavior
+        e.preventDefault();
         showContactForm();
     });
 
@@ -25,12 +26,6 @@ $(document).ready(function () {
             `Thank you for taking the time to share your endorsement. Your voice helps 
             uplift this work. Together, we're building something powerful in education.`
         );
-    });
-
-    $(".modal_close").click(function (e) {
-        console.log("close button clicked");
-        //e.preventDefault(); // Prevent default anchor click behavior
-        closeModal(this);
     });
 
     $("#email_link").on("click", function (e) {
@@ -48,6 +43,40 @@ $(document).ready(function () {
                 console.error("Failed to read clipboard contents: ", err);
             });
       });
+
+      modalCloseButtons.click(function (e) {
+        console.log("close button clicked");
+        //e.preventDefault(); // Prevent default anchor click behavior
+        closeModal(this);
+    });
+
+    if (!modalForm.length) {
+        console.warn("No form found in #modal_wrapper");
+    } else {
+        modalForm.on("submit", async function(e){
+            e.preventDefault();
+
+            try {
+                const resp = await fetch(this.action, {
+                    method:  this.method,
+                    body:    new FormData(this),
+                    headers: { "Accept":"application/json" }
+                });
+
+                if (resp.ok) {
+                    // hide form, show thank-you
+                    modalForm.addClass("no_display");
+                    modalMessage.removeClass("no_display");
+                    this.reset();
+                } else {
+                    alert("There was a problem submitting the form. Please try again.");
+                }
+            } catch (err) {
+                console.error("Submit error:", err);
+                alert("There was a problem submitting the form.");
+            }
+        });
+    }
 });
 
 $(function(){
@@ -92,7 +121,7 @@ $(function(){
     var $win        = $(window);
     var servicesWrapperTop = $('[show_contact]').offset().top;
     let visible     = false;
-    let scrollEnabled = true;//sessionStorage.getItem('contactAutoShown') !== 'yes';
+    let scrollEnabled = sessionStorage.getItem('contactAutoShown') !== 'yes';
   
     // compute header height once (if it’s static)
     var headerS = $('#top_menu').outerHeight() || 0;
@@ -216,7 +245,7 @@ function showForm(action, header, message, type, response, callback=null) {
     .fadeIn(800);
 }
 
-document.addEventListener("DOMContentLoaded", function () {
+/*document.addEventListener("DOMContentLoaded", function () {
     const form = document.querySelector("#modal_wrapper form");
 
     if (!form) {
@@ -247,4 +276,4 @@ document.addEventListener("DOMContentLoaded", function () {
             alert("There was a problem submitting the form.");
         });
     });
-});
+});*/

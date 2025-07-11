@@ -244,6 +244,45 @@ $(function () {
     });
 }); // end of $(function())
 
+$(function(){
+    var $win        = $(window);
+    var $heroHeaderWrapper = $('.hero-header-wrapper');
+    //var $heroHeader = $('.hero-header');//.hide();
+    var $heroBgs    = $('.hero-background'); 
+    var visible     = false;
+  
+    // compute header height once (if it’s static)
+    var headerH = $('#top_menu').outerHeight() || 0;
+  
+    function checkHeroScroll(){
+      var scrollTop = $win.scrollTop();
+  
+      // pick the visible hero image (desktop or mobile)
+      var $bg = $heroBgs.filter(':visible');
+      if (!$bg.length) return;  // safety
+  
+      // bottom edge of that image
+      var bgBottom = $bg.offset().top + $bg.outerHeight();
+  
+      // define threshold so it accounts for the fixed header
+      var threshold = bgBottom - headerH;
+  
+      if (!visible && scrollTop >= threshold) {
+        $heroHeaderWrapper.addClass('fade-in');
+
+        visible = true;
+      }
+      else if (visible && scrollTop < threshold) {
+        $heroHeaderWrapper.removeClass('fade-in');
+        visible = false;
+      }
+    }
+  
+    $win.on('scroll resize', checkHeroScroll);
+    checkHeroScroll();
+});
+
+
 function showContactForm(){
     showForm(
         "https://formspree.io/f/mnndgnqz",
