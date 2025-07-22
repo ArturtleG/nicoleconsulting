@@ -1,96 +1,75 @@
 /* eslint-disable require-jsdoc, valid-jsdoc */
-const {setGlobalOptions} = require("firebase-functions");
-const functions = require("firebase-functions");
-const admin = require("firebase-admin");
-const Busboy = require("busboy");
-const nodemailer = require("nodemailer");
+const { setGlobalOptions }        = require('firebase-functions');
+const { onRequest }               = require('firebase-functions/v2/https');
+const { initializeApp }           = require('firebase-admin/app');
+const { getFirestore, FieldValue } = require('firebase-admin/firestore');
+const express                     = require('express');
+const cors                        = require('cors');
+const nodemailer                  = require('nodemailer');
 
-// Limit concurrency to 10 instances
-setGlobalOptions({maxInstances: 10});
+// —— CONFIGURE & INIT ————————————————————————————————————————————————
+setGlobalOptions({ maxInstances: 10 });      // limit concurrency
+initializeApp();
+const db = getFirestore();
 
-// Initialize Firebase Admin
-admin.initializeApp();
-const db = admin.firestore();
-
-// Configure your SMTP transport (e.g. Gmail with App Password)
+// make sure you’ve set this env var in GCP or via `export`/`.env` locally
 const transporter = nodemailer.createTransport({
-  service: "gmail",
+  service: 'gmail',
   auth: {
-    user: "web@mcree-ed.consulting",
-    pass: functions.config().gmail.app_password,
+    user: 'web@mcree-ed.consulting',
+    pass: process.env.GMAIL_APP_PASSWORD,
   },
 });
 
-/**
- * Parse an incoming multipart/form-data request into a simple key/value object.
- */
-function parseForm(req) {
-  return new Promise((resolve, reject) => {
-    const busboy = new Busboy({headers: req.headers});
-    const fields = {};
-    busboy.on("field", (name, val) => (fields[name] = val));
-    busboy.on("finish", () => resolve(fields));
-    busboy.on("error", reject);
-    busboy.end(req.rawBody);
+// —— FACTORY TO BUILD EACH EXPRESS APP ——————————————————————————————
+function makeFormHandler({ collection, textField, subjectLabel }) {
+  const app = express();
+  app.use(cors({ origin: true }));
+  app.use(express.json());
+  app.use(express.urlencoded({ extended: false }));
+
+  app.post('/', async (req, res) => {
+    if (req.method !== 'POST') return res.status(405).send('Method Not Allowed');
+
+    try {
+      const { name = null, email = null } = req.body;
+      const text = req.body[textField] || null;
+
+      // 1) write to Firestore
+      await db.collection(collection).add({
+        name,
+        email,
+        [textField]: text,
+        submittedAt: FieldValue.serverTimestamp(),
+      });
+
+      // 2) send email
+      await transporter.sendMail({
+        from:    'WEB <web@mcree-ed.consulting>',
+        to:      ['web@mcree-ed.consulting'],
+        subject: `New ${subjectLabel}: ${name || 'Anonymous'}`,
+        text:    `Name: ${name}\nEmail: ${email}\n\n${text}`,
+      });
+
+      return res.json({ success: true });
+    } catch (err) {
+      console.error(`${subjectLabel} error:`, err);
+      return res.status(500).json({ error: 'Internal Server Error' });
+    }
   });
+
+  return app;
 }
 
-/**
- * HTTP handler for contact‐form submissions.
- */
-exports.submitContact = functions.https.onRequest(async (req, res) => {
-  if (req.method !== "POST") {
-    return res.status(405).send("Method Not Allowed");
-  }
-  try {
-    const data = await parseForm(req);
-    // 1) Save to Firestore
-    await db.collection("contacts").add({
-      name: data.name || null,
-      email: data.email || null,
-      message: data.message || null,
-      submittedAt: admin.firestore.FieldValue.serverTimestamp(),
-    });
-    // 2) Send notification email
-    await transporter.sendMail({
-      from: "WEB <web@mcree-ed.consulting>",
-      to: ["web@mcree-ed.consulting"],
-      subject: `New Contact: ${data.name || "Anonymous"}`,
-      text: `Name: ${data.name}\nEmail: ${data.email}\n\n${data.message}`,
-    });
-    return res.json({success: true});
-  } catch (err) {
-    console.error("submitContact error", err);
-    return res.status(500).json({error: "Internal Server Error"});
-  }
-});
+// ——— EXPORT YOUR FUNCTIONS —————————————————————————————————————
+exports.submitContact     = onRequest(makeFormHandler({
+  collection:  'contacts',
+  textField:   'message',
+  subjectLabel: 'Contact'
+}));
 
-/**
- * HTTP handler for endorsement‐form submissions.
- */
-exports.submitEndorsement = functions.https.onRequest(async (req, res) => {
-  if (req.method !== "POST") {
-    return res.status(405).send("Method Not Allowed");
-  }
-  try {
-    const data = await parseForm(req);
-    // 1) Save to Firestore
-    await db.collection("endorsements").add({
-      name: data.name || null,
-      email: data.email || null,
-      endorsement: data.endorsement || null,
-      submittedAt: admin.firestore.FieldValue.serverTimestamp(),
-    });
-    // 2) Send notification email
-    await transporter.sendMail({
-      from: "WEB <web@mcree-ed.consulting>",
-      to: ["web@mcree-ed.consulting"],
-      subject: `New Endorsement: ${data.name || "Anonymous"}`,
-      text: `Name: ${data.name}\nEmail: ${data.email}\n\n${data.endorsement}`,
-    });
-    return res.json({success: true});
-  } catch (err) {
-    console.error("submitEndorsement error", err);
-    return res.status(500).json({error: "Internal Server Error"});
-  }
-});
+exports.submitEndorsement = onRequest(makeFormHandler({
+  collection:  'endorsements',
+  textField:   'endorsement',
+  subjectLabel: 'Endorsement'
+}));
