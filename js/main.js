@@ -244,36 +244,3 @@ function showForm(action, header, message, type, response, callback=null) {
     .hide()
     .fadeIn(800);
 }
-
-/*document.addEventListener("DOMContentLoaded", function () {
-    const form = document.querySelector("#modal_wrapper form");
-
-    if (!form) {
-        console.log("Form not found in modal_wrapper.");
-        return;
-    }
-
-    form.addEventListener("submit", function (e) {
-        e.preventDefault(); // stop default form submission so we can handle it manually
-
-        const formData = new FormData(form);
-
-        fetch(form.action, {
-            method: form.method,
-            body: formData,
-            headers: {
-                'Accept': 'application/json'
-            }
-        }).then(response => {
-        if (response.ok) {
-            modalMessage.removeClass("no_display");
-            modalForm.addClass("no_display");
-            form.reset();
-        } else {
-            alert("There was a problem submitting the form. Please try again.");
-        }
-        }).catch(error => {
-            alert("There was a problem submitting the form.");
-        });
-    });
-});*/
