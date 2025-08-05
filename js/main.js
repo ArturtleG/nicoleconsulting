@@ -1,3 +1,10 @@
+import {
+  db,
+  collection,
+  addDoc,
+  serverTimestamp
+} from "./firebaseSetup.js";
+
 let modal             = $("#modal_wrapper");
 let modalMessage      = $("#modal_message_wrapper");
 let modalForm         = $("#modal_wrapper form");
@@ -7,6 +14,7 @@ let modalText         = $("#modal_text");
 let modalTitle        = $("#modal_title");
 let modalTypeForm     = $(".type_form");
 let modalCloseButtons = $(".modal_close");
+
 
 $(document).ready(function () {
     // Show the modal when the button is clicked
@@ -18,7 +26,8 @@ $(document).ready(function () {
     $(".endorse_button").click(function (e) {
         //e.preventDefault(); // Prevent default anchor click behavior
         showForm(
-            "https://formspree.io/f/movdkdby",
+            //"https://formspree.io/f/movdkdby",
+            "endorse",
             "Endorse",
             `I am honored that you felt moved to endorse my work. 
             Your endorsement is a powerful way to support my mission and help others discover the impact of my work.`,
@@ -53,7 +62,7 @@ $(document).ready(function () {
     if (!modalForm.length) {
         console.warn("No form found in #modal_wrapper");
     } else {
-        modalForm.on("submit", async function(e){
+        /*modalForm.on("submit", async function(e){
             e.preventDefault();
 
             try {
@@ -74,6 +83,61 @@ $(document).ready(function () {
             } catch (err) {
                 console.error("Submit error:", err);
                 alert("There was a problem submitting the form.");
+            }
+        });*/
+        modalForm.on("submit", async function(e){
+            e.preventDefault();
+
+            // grab the fields out of your <form>
+            const name        = this.elements.name.value;
+            const email       = this.elements.email.value;
+            const message     = this.elements.message.value;
+            // endorsement vs. contact:
+            const isEndorse   = !!$(this).attr("action").match(/endorse/);
+
+            console.log("isEndorse:", isEndorse);
+
+            try {
+                await addDoc(
+                    collection(db, isEndorse ? "endorsements" : "contacts"),
+                    {
+                        name,
+                        email,
+                        message,
+                        submittedAt: serverTimestamp(),
+                    }
+                );
+
+                await addDoc(collection(db, "mail"), {      
+                    to: isEndorse?["web@mcree-ed.consulting"]:["web@mcree-ed.consulting","nicole@mcree-ed.consulting"],
+                    message: {
+                        subject: isEndorse
+                        ? `New Endorsement: ${name || "Anonymous"}`
+                        : `New Contact:     ${name || "Anonymous"}`,
+                        text: "Email:" + email + "\n\n" + message,
+                        html: `<p><strong>Name:</strong> ${name}</p>
+                            <p><strong>Email:</strong> ${email}</p>
+                            <div style="
+                                border: 2px solid #004c6d;
+                                border-left: 8px solid #004c6d;
+                                border-radius: 12px;
+                                margin: 1em 4em 1em 2em;
+                                padding: 2em;
+                                color: #222;
+                                font-family: Tahoma, sans-serif;
+                                font-size: 1.2em;">
+                                ${message.replace(/\n/g, "<br/>")}
+                            </div>`
+                    },
+                });
+
+                modalForm.addClass("no_display");
+                modalMessage.removeClass("no_display");
+                this.reset();
+
+            } catch (err) {
+                console.error("Submit error:", err);
+                alert("There was a problem submitting the form. Please try again.");
             }
         });
     }
@@ -148,7 +212,8 @@ $(function(){
 
 function showContactForm(){
     showForm(
-        "https://formspree.io/f/mnndgnqz",
+        //"https://formspree.io/f/mnndgnqz",
+        "contact",
         "Contact",
         `<p>
             Discover more about my work! Below are samples. For a more detailed look, 
