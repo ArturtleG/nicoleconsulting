@@ -310,7 +310,7 @@ function showForm(action, header, message, type, response, callback=null) {
     modalTypeForm.text(type);
     modalFormHeader.text(header + " Nicole");
     modalFormMessage.html(message);
-    modalTitle.text("Thank you for sumitting your " + type + ".");
+    modalTitle.text("Thank you for submitting your " + type + ".");
     modalText.text(response);
 
     console.log("showForm header:", header);
