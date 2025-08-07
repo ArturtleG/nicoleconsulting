@@ -14,6 +14,7 @@ let modalText         = $("#modal_text");
 let modalTitle        = $("#modal_title");
 let modalTypeForm     = $(".type_form");
 let modalCloseButtons = $(".modal_close");
+let submitButton      = $("[type=submit]");
 
 
 $(document).ready(function () {
@@ -97,6 +98,8 @@ $(document).ready(function () {
 
             console.log("isEndorse:", isEndorse);
 
+            submitButton.text("Submitting...").addClass("blink").prop("disabled", true);
+
             try {
                 await addDoc(
                     collection(db, isEndorse ? "endorsements" : "contacts"),
@@ -109,7 +112,8 @@ $(document).ready(function () {
                 );
 
                 await addDoc(collection(db, "mail"), {      
-                    to: isEndorse?["web@mcree-ed.consulting"]:["web@mcree-ed.consulting","nicole@mcree-ed.consulting"],
+                    to: isEndorse?["web@mcree-ed.consulting"]:
+                        ["web@mcree-ed.consulting","nicole@mcree-ed.consulting"],
                     message: {
                         subject: isEndorse
                         ? `New Endorsement: ${name || "Anonymous"}`
@@ -131,13 +135,14 @@ $(document).ready(function () {
                     },
                 });
 
-                modalForm.addClass("no_display");
-                modalMessage.removeClass("no_display");
-                this.reset();
-
             } catch (err) {
                 console.error("Submit error:", err);
                 alert("There was a problem submitting the form. Please try again.");
+            } finally {
+                modalForm.addClass("no_display");
+                modalMessage.removeClass("no_display");
+                this.reset();
+                submitButton.text("Submit").removeClass("blink").prop("disabled", false);
             }
         });
     }

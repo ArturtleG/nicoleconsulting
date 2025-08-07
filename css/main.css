@@ -18,6 +18,18 @@ body {
     background: var(--color-bg);
     padding-top: var(--header-height); /* push content below fixed header */
 }
+
+.blink {
+    animation: blinker 1.5s linear infinite;
+}
+
+.blink:hover{
+    cursor: wait;
+}
+
+@keyframes blinker {
+    50% { opacity: 0; }
+}
   
   /* Utility classes */
 .row{

@@ -1,6 +1,4 @@
 import {
-    auth,
-    provider,
     db,
     collection,
     query, 
@@ -23,6 +21,7 @@ let modalFormMessage = $("#modal_wrapper #form_message");
 let modalText = $("#modal_text");
 let modalTitle = $("#modal_title");
 let modalTypeForm = $(".type_form");
+let submitButton      = $("[type=submit]");
 
 
 // 2) WRAP EVERYTHING IN A JQUERY READY CALLBACK
@@ -392,6 +391,8 @@ document.addEventListener("DOMContentLoaded", function () {
 
         console.log("isEndorse:", isEndorse);
 
+        submitButton.text("Submitting...").addClass("blink").prop("disabled", true);
+
         try {
             await addDoc(
                 collection(db, isEndorse ? "endorsements" : "contacts"),
@@ -433,6 +434,11 @@ document.addEventListener("DOMContentLoaded", function () {
         } catch (err) {
             console.error("Submit error:", err);
             alert("There was a problem submitting the form. Please try again.");
+        } finally {
+            modalForm.addClass("no_display");
+            modalMessage.removeClass("no_display");
+            this.reset();
+            submitButton.text("Submit").removeClass("blink").prop("disabled", false);
         }
     });
 });
