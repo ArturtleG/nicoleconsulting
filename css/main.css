@@ -757,6 +757,44 @@ footer .logo{
     font-size: 1rem;
 }
 
+input[type="checkbox"]{
+    position: relative;
+    height: 32px !important;
+    width: 32px !important;
+    margin: 0 !important;
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    background-color: #e0e0e0;
+    border: 1px solid #ccc;
+    border-radius: 3px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+input[type="checkbox"]:checked {
+    background-color: var(--color-accent);
+}
+
+input[type="checkbox"]:hover {
+    box-shadow: 0 0 5px var(--color-primary);
+}
+
+input[type="checkbox"]:checked::after {
+    content: "✔";
+    font-size: 24px;
+    color: white;
+}
+
+[for="subscribe_newsletter"]{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+}
+
 #modal_wrapper form textarea{
     height: 20vh;
     margin-bottom: 0;

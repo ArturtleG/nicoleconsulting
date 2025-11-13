@@ -1,7 +1,9 @@
 import {
   db,
   collection,
+  doc,
   addDoc,
+  setDoc,
   serverTimestamp
 } from "./firebaseSetup.js";
 
@@ -18,6 +20,11 @@ let submitButton      = $("[type=submit]");
 
 
 $(document).ready(function () {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('qr') === 'newsletter') {
+        showContactForm();
+    }
+
     // Show the modal when the button is clicked
     $(".contact_button,#icon_contact").click(function (e) {
         e.preventDefault();
@@ -32,6 +39,7 @@ $(document).ready(function () {
             "Endorse",
             `I am honored that you felt moved to endorse my work. 
             Your endorsement is a powerful way to support my mission and help others discover the impact of my work.`,
+            "endorsement",
             "endorsement", 
             `Thank you for taking the time to share your endorsement. Your voice helps 
             uplift this work. Together, we're building something powerful in education.`
@@ -63,63 +71,92 @@ $(document).ready(function () {
     if (!modalForm.length) {
         console.warn("No form found in #modal_wrapper");
     } else {
-        /*modalForm.on("submit", async function(e){
+        modalForm.on("submit", async function (e) {
             e.preventDefault();
 
-            try {
-                const resp = await fetch(this.action, {
-                    method:  this.method,
-                    body:    new FormData(this),
-                    headers: { "Accept":"application/json" }
-                });
+            const name    = this.elements.name.value.trim();
+            const email   = this.elements.email.value.trim().toLowerCase();
+            const message = this.elements.message.value.trim() || "No message";
 
-                if (resp.ok) {
-                    // hide form, show thank-you
-                    modalForm.addClass("no_display");
-                    modalMessage.removeClass("no_display");
-                    this.reset();
+            const isEndorse = !!$(this).attr("action").match(/endorse/);
+            const subscribeNewsletter =
+                !isEndorse && this.elements.subscribe_newsletter?.checked;
+
+            submitButton
+                .text("Submitting...")
+                .addClass("blink")
+                .prop("disabled", true);
+
+            let success = false;
+
+            const emailToId = (value) =>
+                value.replace(/[.#$/\[\]]/g, "_");
+
+            try {
+                let targetCollection, subjectType, additionalMessage = "";
+
+                if (isEndorse) {
+                    targetCollection = "endorsements";
+                    subjectType = "New Endorsement";
+                } else if (subscribeNewsletter) {
+                    targetCollection = "newsletters_email";
+                    subjectType = "New Newsletter Subscriber";
+                    $("#modal_text").html(`
+                        Thank you for subscribing to Roots & Reason! I'm excited to share this journey with 
+                        you. Look for my newsletter in your inbox soon.`
+                    );
+                    //additionalMessage = "<br><br>Look for my Roots & Reason in your inbox soon!";
                 } else {
-                    alert("There was a problem submitting the form. Please try again.");
+                    targetCollection = "contacts";
+                    subjectType = "New Contact";
                 }
-            } catch (err) {
-                console.error("Submit error:", err);
-                alert("There was a problem submitting the form.");
-            }
-        });*/
-        modalForm.on("submit", async function(e){
-            e.preventDefault();
 
-            // grab the fields out of your <form>
-            const name        = this.elements.name.value;
-            const email       = this.elements.email.value;
-            const message     = this.elements.message.value;
-            // endorsement vs. contact:
-            const isEndorse   = !!$(this).attr("action").match(/endorse/);
+                // 1) Write to Firestore
 
-            console.log("isEndorse:", isEndorse);
-
-            submitButton.text("Submitting...").addClass("blink").prop("disabled", true);
-
-            try {
-                await addDoc(
-                    collection(db, isEndorse ? "endorsements" : "contacts"),
-                    {
+                if (targetCollection === "endorsements") {
+                    // allow multiple endorsements per email
+                    await addDoc(collection(db, "endorsements"), {
                         name,
                         email,
                         message,
                         submittedAt: serverTimestamp(),
-                    }
-                );
+                        source: "endorsement_form",
+                    });
+                } else {
+                    // contacts & newsletters_email: one per email (overwrites allowed)
+                    const id = emailToId(email);
+                    const base = {
+                        name,
+                        email,
+                        message,
+                        source:
+                            targetCollection === "contacts"
+                                ? "contact_form"
+                                : "newsletter_form",
+                    };
 
-                await addDoc(collection(db, "mail"), {      
-                    to: isEndorse?["web@mcree-ed.consulting"]:
-                        ["web@mcree-ed.consulting","nicole@mcree-ed.consulting"],
+                    await setDoc(
+                        doc(db, targetCollection, id),
+                        targetCollection === "contacts"
+                            ? { ...base, submittedAt: serverTimestamp() }
+                            : { ...base, subscribedAt: serverTimestamp() },
+                        { merge: true } // keeps it idempotent/future-proof
+                    );
+                }
+
+                // 2) Send notification email
+
+                await addDoc(collection(db, "mail"), {
+                    to: isEndorse
+                        ? ["web@mcree-ed.consulting"]
+                        //: ["web@mcree-ed.consulting", "nicole@mcree-ed.consulting"],
+                        : ["web@mcree-ed.consulting"],
                     message: {
-                        subject: isEndorse
-                        ? `New Endorsement: ${name || "Anonymous"}`
-                        : `New Contact:     ${name || "Anonymous"}`,
-                        text: "Email:" + email + "\n\n" + message,
-                        html: `<p><strong>Name:</strong> ${name}</p>
+                        subject: `${subjectType}: ${name || "Anonymous"}`,
+                        text:
+                            `Email: ${email}\n\n${message}`,
+                        html: `
+                            <p><strong>Name:</strong> ${name}</p>
                             <p><strong>Email:</strong> ${email}</p>
                             <div style="
                                 border: 2px solid #004c6d;
@@ -135,16 +172,28 @@ $(document).ready(function () {
                     },
                 });
 
+                success = true;
+
             } catch (err) {
                 console.error("Submit error:", err);
                 alert("There was a problem submitting the form. Please try again.");
             } finally {
-                modalForm.addClass("no_display");
-                modalMessage.removeClass("no_display");
-                this.reset();
-                submitButton.text("Submit").removeClass("blink").prop("disabled", false);
+                submitButton
+                    .text("Submit")
+                    .removeClass("blink")
+                    .prop("disabled", false);
+
+                if (success) {
+                    modalForm.addClass("no_display");
+                    modalMessage.removeClass("no_display");
+                    this.reset();
+                } else {
+                    modalForm.removeClass("no_display");
+                    modalMessage.addClass("no_display");
+                }
             }
         });
+
     }
 });
 
@@ -221,16 +270,22 @@ function showContactForm(){
         "contact",
         "Contact",
         `<p>
-            Discover more about my work! Below are samples. For a more detailed look, 
-            please send me a message, and I will respond as soon as possible. Thank you 
-            for reaching out!
+            Subscribe to “Roots & Reason”, a newsletter that explores fresh ideas, practical strategies, 
+            and professional learning resources.  Want to connect or collaborate? Leave a message and 
+            I'll be in touch soon!
         </p>
         <div class="button_wrapper u-flex-center">
             <a href="https://drive.google.com/drive/folders/1Prrg3mlEv0TZ6Ha174LWF4ufzyHZMR8n?usp=sharing" target="_blank" class="primary-button">
                 Click for Samples
             </a>
+            <div>
+                <label for="subscribe_newsletter">Subscribe to my Newsletter!!!
+                    <input type="checkbox" id="subscribe_newsletter" name="subscribe_newsletter" value="yes" />
+                </label>
+            </div>
         </div>`,
-        "message", 
+        "message",
+        "contact info",
         "I will get back to you as soon as possible.",
         "showContactButton"
     )
@@ -293,12 +348,12 @@ function showMessage(title, message){
 }
 
 
-function showForm(action, header, message, type, response, callback=null) {
+function showForm(action, header, message, type, supText, response, callback=null) {
     modalForm.attr("action", action);
     modalTypeForm.text(type);
     modalFormHeader.text(header + " Nicole");
     modalFormMessage.html(message);
-    modalTitle.text("Thank you for submitting your " + type + ".");
+    modalTitle.text("Thank you for submitting your " + supText + ".");
     modalText.text(response);
 
     console.log("showForm header:", header);
