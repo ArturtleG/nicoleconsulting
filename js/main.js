@@ -149,8 +149,8 @@ $(document).ready(function () {
                 await addDoc(collection(db, "mail"), {
                     to: isEndorse
                         ? ["web@mcree-ed.consulting"]
-                        //: ["web@mcree-ed.consulting", "nicole@mcree-ed.consulting"],
-                        : ["web@mcree-ed.consulting"],
+                        : ["web@mcree-ed.consulting", "nicole@mcree-ed.consulting"],
+                        //: ["web@mcree-ed.consulting"],
                     message: {
                         subject: `${subjectType}: ${name || "Anonymous"}`,
                         text:
@@ -275,9 +275,9 @@ function showContactForm(){
             I'll be in touch soon!
         </p>
         <div class="button_wrapper u-flex-center">
-            <a href="https://drive.google.com/drive/folders/1Prrg3mlEv0TZ6Ha174LWF4ufzyHZMR8n?usp=sharing" target="_blank" class="primary-button">
+            <!--<a href="https://drive.google.com/drive/folders/1Prrg3mlEv0TZ6Ha174LWF4ufzyHZMR8n?usp=sharing" target="_blank" class="primary-button">
                 Click for Samples
-            </a>
+            </a>-->
             <div>
                 <label for="subscribe_newsletter">Subscribe to my Newsletter!!!
                     <input type="checkbox" id="subscribe_newsletter" name="subscribe_newsletter" value="yes" />
