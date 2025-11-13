@@ -21,7 +21,7 @@ let submitButton      = $("[type=submit]");
 
 $(document).ready(function () {
     const params = new URLSearchParams(window.location.search);
-    if (params.get('qr') === 'newsletter') {
+    if (params.get('qr') === '1') {
         showContactForm();
     }
 
@@ -284,7 +284,7 @@ function showContactForm(){
                 </label>
             </div>
         </div>`,
-        "message",
+        "message (optional)",
         "contact info",
         "I will get back to you as soon as possible.",
         "showContactButton"
