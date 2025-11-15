@@ -37,8 +37,11 @@ $(function () {
     // A) AUTHENTICATION: show/hide login vs. admin UI
     // --------------------------------------------------
     const $loginWrapper  = $("#login_wrapper");
-    const $postsSection  = $("#previous_posts_wrapper");
+    const $blogsWrapper  = $("#blogs_wrapper");
+    const $newslettersWrapper  = $("#newsletters_wrapper");
     const $loginButton   = $("#login_button");
+    const $displayPostsButton = $("#display_posts_button");
+    const $dispayNewslettersButton = $("#display_newsletter_button");
 
     // Whitelist of allowed admin emails
     const authorizedEmails = [
@@ -52,7 +55,7 @@ $(function () {
         .then(result => {
         const user = result.user;
         if (authorizedEmails.includes(user.email)) {
-            $postsSection.show();
+            $newslettersWrapper.show();
             $loginWrapper.hide();
         } else {
             alert("Unauthorized user");
@@ -66,13 +69,24 @@ $(function () {
   // On page load / refresh, show or hide based on auth state
     onAuthStateChanged(auth, user => {
         if (user && authorizedEmails.includes(user.email)) {
-            $postsSection.show();
+            $newslettersWrapper.show();
             $loginWrapper.hide();
         } else {
-            $postsSection.hide();
+            $blogsWrapper.hide();
+            $newslettersWrapper.hide();
             $loginWrapper.show();
         }
     });
+
+    $displayPostsButton.on("click", () => {
+        $("#blogs_wrapper").show();
+        $("#newsletters_wrapper").hide();
+    });
+
+    $dispayNewslettersButton.on("click", () => {
+        $("#blogs_wrapper").hide();
+        $("#newsletters_wrapper").show();
+    }); 
 
 
     // --------------------------------------------------
@@ -590,3 +604,148 @@ async function deletePost(slug) {
         alert("Failed to delete post: " + err.message);
     }
 }
+
+
+/**** NEWSLETTER ****/
+
+// tiny helper to avoid XSS when inserting text
+const escapeHtml = (s = "") =>
+  s.replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+
+async function loadContactsAndNewsletters() {
+  const $wrapper = $(".contacts_list_wrapper");
+  $wrapper.html('<div class="contact_list_row"><div>Loading…</div></div>');
+
+  try {
+    // fetch both collections in parallel
+    const [contactsSnap, newslettersSnap] = await Promise.all([
+      getDocs(collection(db, "contacts")),
+      getDocs(collection(db, "newsletters_email")),
+    ]);
+
+    // Merge into a map keyed by normalized email
+    const byEmail = new Map();
+
+    // helper to upsert an entry
+    const upsert = ({ name, email, isContact = false, isNewsletter = false }) => {
+      if (!email) return;
+      const key = email.trim().toLowerCase();
+      const existing = byEmail.get(key) || { name: "", email: key, isContact: false, isNewsletter: false };
+
+      // prefer non-empty name if one source has it
+      const nextName = existing.name || name || "";
+
+      byEmail.set(key, {
+        name: nextName,
+        email: key,
+        isContact: existing.isContact || isContact,
+        isNewsletter: existing.isNewsletter || isNewsletter,
+      });
+    };
+
+    contactsSnap.forEach(doc => {
+      const d = doc.data() || {};
+      // doc.id is your sanitized email, but use field if available
+      const email = (d.email || doc.id || "").toString();
+      const name  = (d.name || "").toString();
+      upsert({ name, email, isContact: true });
+    });
+
+    newslettersSnap.forEach(doc => {
+      const d = doc.data() || {};
+      const email = (d.email || doc.id || "").toString();
+      const name  = (d.name || "").toString();
+      upsert({ name, email, isNewsletter: true });
+    });
+
+    // Sort rows: by name then email (tweak as you like)
+    const rows = Array.from(byEmail.values()).sort((a, b) => {
+      const an = (a.name || "").toLowerCase();
+      const bn = (b.name || "").toLowerCase();
+      if (an && bn && an !== bn) return an.localeCompare(bn);
+      return a.email.localeCompare(b.email);
+    });
+
+    // Render
+    if (rows.length === 0) {
+      $wrapper.html('<div class="contact_list_row"><div>No contacts yet.</div></div>');
+      return;
+    }
+
+    const html = rows.map(({ name, email, isContact, isNewsletter }) => `
+      <div class="contact_list_row">
+        <div>${escapeHtml(name)}</div>
+        <div class="email">${escapeHtml(email)}</div>
+        <div class="type_contact_wrapper">
+          <div class="subscription ${isContact ? "contact" : ""}"></div>
+          <div class="subscription ${isNewsletter ? "newsletter" : ""}"></div>
+        </div>
+      </div>
+    `).join("");
+
+    $wrapper.html(html);
+
+    // Optionally: trigger your existing filter once to apply initial state
+    $("#contact_choice_wrapper input").trigger("change");
+
+  } catch (err) {
+    console.error("Failed loading contacts/newsletters:", err);
+    $(".contacts_list_wrapper").html(
+      `<div class="contact_list_row"><div>Failed to load entries.</div></div>`
+    );
+  }
+}
+
+// call it when the admin page is ready / after auth completes
+$(loadContactsAndNewsletters);
+
+
+$("#contact_choice_wrapper input").on("change", function() {
+    let showContacts = $("#contacts_check").is(":checked");
+    let showNewsletters = $("#newsletter_check").is(":checked");
+    let allRows = $(".contact_list_row:not(.header_row)");
+
+    allRows.hide();
+
+    allRows.each(function(){
+        console.log($(this));
+        const isContact    = $(this).find(".subscription.contact").length > 0;
+        const isNewsletter = $(this).find(".subscription.newsletter").length > 0;
+
+        console.log("isContact:", isContact, "isNewsletter:", isNewsletter);
+
+        if(showContacts && isContact || showNewsletters && isNewsletter){
+            $(this).show();
+        }
+    });
+});
+
+$("#copy_addresses_button").on("click", async function() {
+    const $email_modal = $("#email_copied_result .small_modal");
+    const emails = [];
+    $(".contact_list_row:not(.header_row):visible").each(function() {
+        const email = $(this).find(".email").text().trim();
+        if (email && !emails.includes(email)) emails.push(email);
+    });
+
+    if (!emails.length) {
+        $email_modal.text("No visible emails to copy.");
+        $email_modal.parent().fadeIn(200);
+        setTimeout(() => $email_modal.parent().fadeOut(800), 2000);
+        return;
+    }
+
+    const emailString = emails.join(", ");
+    //const $btn = $(this);
+    //const originalText = $btn.text();
+
+    try {
+        await navigator.clipboard.writeText(emailString);
+        $email_modal.text(`Copied ${emails.length} emails to clipboard!`);
+        $email_modal.parent().fadeIn(200);
+        setTimeout(() => $email_modal.parent().fadeOut(800), 2000);
+    } catch (err) {
+        console.error("Clipboard error:", err);
+        alert("Clipboard access failed. Try manually copying.");
+    }
+});

@@ -131,7 +131,37 @@ nav li:hover{
     cursor: pointer;
     border: none;
 }
-  
+
+.square_button{
+    width: 48px;
+    height: 48px;
+    background-size: 32px 32px;
+    background-repeat: no-repeat;
+    background-position: center;
+}
+
+.bottom_right_button_wrapper{
+    display: flex;
+    flex-direction: column;
+    gap: .2rem;
+    position: fixed;
+    bottom: 10px;
+    right: 10px;
+    z-index: 2000;
+  }
+
+
+.new_button{
+    background-image: url("../images/icon_plus.png");
+} 
+
+.upload_button{
+    background-image: url("../images/icon_upload.png");
+}
+
+.copy_button{
+    background-image: url("../images/icon_copy.png");
+}
 
 .top_submenu_wrapper {
     /*position: fixed;
@@ -238,7 +268,7 @@ p:only-child {
     display: flex;
     flex-direction: column;
     width: 100%;
-    z-index: 10;
+    /*z-index: 10;*/
     position: relative;
   }
 
@@ -602,15 +632,7 @@ p:only-child {
     8. SOCIAL MEDIA
   --------------------------------------------------------------*/
 
-  #social{
-    display: flex;
-    flex-direction: column;
-    gap: .2rem;
-    position: fixed;
-    bottom: 10px;
-    right: 10px;
-    z-index: 2000;
-  }
+  
 
   #social img{
     width: 48px;
@@ -686,6 +708,25 @@ footer .logo{
     padding: 0.5em;
     text-align: center;
     z-index: 1001;
+}
+  
+  /*--------------------------------------------------------------
+  10. MODAL STYLES
+  --------------------------------------------------------------*/
+.small_modal_wrapper{
+    position: relative;
+    display: none;
+    width: 0;
+    height: 0;
+}
+
+.small_modal{
+    position: absolute;
+    right: 0;
+    padding: 5px 10px;
+    border-radius: 5px;
+    font-size: 0.9rem;
+    opacity: 0.9;
 }
 
 #modal_wrapper{
@@ -771,11 +812,13 @@ input[type="checkbox"]{
     -moz-appearance: none;
     background-color: #e0e0e0;
     border: 1px solid #ccc;
-    border-radius: 3px;
+    border: 1px solid var(--color-primary);
+    border-radius: 10px;
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
+
 }
 
 input[type="checkbox"]:checked {

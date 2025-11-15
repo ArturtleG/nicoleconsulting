@@ -1,0 +1,70 @@
+#contacts_table_wrapper .header{
+    display: grid;
+    gap: 10px;
+    grid-template-columns: 1fr 1fr;
+}
+
+#contact_choice_wrapper{
+    display: flex;
+    gap: 20px;
+    justify-content: end;
+    align-items: center;
+}
+
+#contact_choice_wrapper > div{
+    display: flex;
+    align-items: center;
+}
+
+#contacts_table_wrapper .header_row{
+    border-bottom: 1px solid var(--color-text);
+    font-family: "Josefin Sans", sans-serif;
+    margin-top: 20px;
+    /*font-family: "Quicksand", sans-serif;
+    font-family: "Varela Round", sans-serif;*/
+    font-family: "Glass Antiqua", cursive;
+    font-weight: bold;
+}
+
+.contact_list_row{
+    display: grid;
+    gap: 10px;
+    grid-template-columns: .5fr 1fr 80px;
+}
+
+.email{
+    font-weight: bold;
+}
+
+.type_contact_wrapper{
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    padding: 5px;
+    gap: 5px;
+}
+
+.contact, .newsletter{
+    padding: 10px;
+    border-radius: 5px;
+    color: white;
+}
+
+.contact{
+    background-color: var(--color-contact-bg);
+}
+
+.newsletter{
+    background-color: var(--color-newsletter-bg);
+}
+
+#email_copied_result{
+    top: -80px;
+}
+
+#email_copied_result .small_modal{
+    background-color: var(--color-primary);
+    color: white;
+    font-family: "Josefin Sans", sans-serif;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    width: max-content;
+}
