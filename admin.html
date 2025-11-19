@@ -70,16 +70,16 @@
                             <div class="form_info">
                                 <label>
                                     <h5 class="primary uppercase">Title</h5>
-                                    <input type="text" id="title" required>
+                                    <input type="text" id="post_title" required>
                                 </label>
                                 <label>
                                     <h5 class="primary uppercase">Slug</h5>
-                                    <input type="text" id="slug" placeholder="e.g. how-ngss-builds-equity" required>
+                                    <input type="text" id="post_slug" placeholder="e.g. how-ngss-builds-equity" required>
                                 </label>
 
                                 <label>
                                     <h5 class="primary uppercase">Tags</h5>
-                                    <input type="text" id="tags" placeholder="e.g. NGSS, PLC, workshop" required>
+                                    <input type="text" id="post_tags" placeholder="e.g. NGSS, PLC, workshop" required>
                                 </label>
                             </div>
                             <div id="blog_form_content">
@@ -135,7 +135,7 @@
                                         </div>
                                     </div>
                                 </div>
-                                <div class="contact_list_row header_row">  
+                                <div class="item_row header_row">  
                                     <div>Name</div>
                                     <div>Email</div>
                                     <div></div>
@@ -154,7 +154,7 @@
                                 <div class="header">
                                     <h4>Previous Newsletters</h4>
                                 </div>
-                                <div class="contact_list_row header_row">  
+                                <div class="item_row header_row">  
                                     <div>Title</div>
                                     <div>Date</div>
                                 </div>
@@ -171,18 +171,22 @@
                     </div>
                 </div>
             </section>
-            <div id="newsletter_preview_modal" class="modal_wrapper"> <!-- NEWSLETTER MODAL -->
+            <div id="newsletter_preview_modal" class="modal_wrapper hidden"> <!-- NEWSLETTER MODAL -->
                 <div id="newsletter_preview_wrapper" class="modal">
                     <div class="form_heading">New Newsletter</div>
                     <form>
                         <div class="form_info">
                             <label>
                                 <h5 class="primary uppercase">Title</h5>
-                                <input type="text" id="title" required>
+                                <input type="text" id="newsletter_title" required>
                             </label>
                             <label>
                                 <h5 class="primary uppercase">Tags</h5>
-                                <input type="text" id="tags" placeholder="e.g. NGSS, PLC, workshop" required>
+                                <input type="text" id="newsletter_tags" placeholder="e.g. NGSS, PLC, workshop" required>
+                            </label>
+                            <label>
+                                <h5 class="primary uppercase">Date to send</h5>
+                                <input type="date" id="newsletter_send_date" required>
                             </label>
                         </div>
                         <div class="form_content">

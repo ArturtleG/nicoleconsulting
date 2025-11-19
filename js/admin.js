@@ -209,22 +209,22 @@ $(function () {
         const removeCover        = !!$modal.data("remove-cover");      // true if user clicked “Remove Cover”
 
         // 1) Title
-        const titleRaw = $("#title").val().trim();
+        const titleRaw = $("#post_title").val().trim();
         if (!titleRaw) {
             $("#statusMsg").text("Title is required.");
             return;
         }
 
         // 2) Slug logic
-        let baseSlug = $("#slug").val().trim();
+        let baseSlug = $("#post_slug").val().trim();
         baseSlug = baseSlug ? slugify(baseSlug) : slugify(titleRaw);
         const slug = (originalSlug === baseSlug)
             ? originalSlug
             : await ensureUniqueSlug(baseSlug);
-        $("#slug").val(slug);
+        $("#post_slug").val(slug);
 
         // 3) Tags array
-        const tagsRaw = $("#tags").val().trim();
+        const tagsRaw = $("#post_tags").val().trim();
         const tags = tagsRaw
             ? tagsRaw.toLowerCase().split(/\s*,\s*/).filter(tag => tag)
             : [];
@@ -259,7 +259,7 @@ $(function () {
             }
 
             // 6) Inline Trix attachments: upload any new ones and rewrite their URLs
-            const trixEditor   = document.querySelector("trix-editor");
+            const trixEditor   = $("#modal_post_form trix-editor")[0]
             const inlineUploads = [];
             trixEditor.editor.getDocument().getAttachments().forEach(att => {
             if (att.file) {
@@ -308,7 +308,7 @@ $(function () {
             // 11) UI feedback & cleanup
             $("#statusMsg").text("Post saved!");
             this.reset();
-            document.querySelector("trix-editor").editor.loadHTML("");
+            $("#modal_post_form trix-editor")[0].editor.loadHTML("");
             $("#image_preview").attr("src", "").hide();
             $("#remove_cover_button").hide();
             loadPreviousPosts();
@@ -478,14 +478,14 @@ $(function () {
             const data = snap.data();
 
             // 1) Prefill title, slug, tags
-            $("#title").val(data.title);
-            $("#slug").val(data.slug);
-            $("#tags").val(data.tags.join(", "));
+            $("#post_title").val(data.title);
+            $("#post_slug").val(data.slug);
+            $("#post_tags").val(data.tags.join(", "));
 
             console.log("hearts:", data.hearts);
 
             // 2) Load Trix editor HTML
-            document.querySelector("trix-editor").editor.loadHTML(data.content);
+            $("#modal_post_form trix-editor")[0].editor.loadHTML(data.content);
 
             // 3) Show or hide the current cover + remove button
             if (data.imageURL) {
@@ -592,10 +592,10 @@ function processTags(input) {
 }
 
 // On Title input → update Slug
-$("#title").on("input", function() {
+$("#post_title").on("input", function() {
     const title = $(this).val();
     const autoSlug = slugify(title);
-    $("#slug").val(autoSlug);
+    $("#post_slug").val(autoSlug);
 });
 
 // Turn any string into a URL‐friendly slug
@@ -661,7 +661,7 @@ const escapeHtml = (s = "") =>
 
 async function loadContactsAndNewsletters() {
   const $wrapper = $(".contacts_list_wrapper");
-  $wrapper.html('<div class="contact_list_row"><div>Loading…</div></div>');
+  $wrapper.html('<div class="item_row"><div>Loading…</div></div>');
 
   try {
     // fetch both collections in parallel
@@ -715,12 +715,12 @@ async function loadContactsAndNewsletters() {
 
     // Render
     if (rows.length === 0) {
-      $wrapper.html('<div class="contact_list_row"><div>No contacts yet.</div></div>');
+      $wrapper.html('<div class="item_row"><div>No contacts yet.</div></div>');
       return;
     }
 
     const html = rows.map(({ name, email, isContact, isNewsletter }) => `
-      <div class="contact_list_row">
+      <div class="item_row">
         <div>${escapeHtml(name)}</div>
         <div class="email">${escapeHtml(email)}</div>
         <div class="type_contact_wrapper">
@@ -738,7 +738,7 @@ async function loadContactsAndNewsletters() {
   } catch (err) {
     console.error("Failed loading contacts/newsletters:", err);
     $(".contacts_list_wrapper").html(
-      `<div class="contact_list_row"><div>Failed to load entries.</div></div>`
+      `<div class="item_row"><div>Failed to load entries.</div></div>`
     );
   }
 }
@@ -750,7 +750,7 @@ $(loadContactsAndNewsletters);
 $("#contact_choice_wrapper input").on("change", function() {
     let showContacts = $("#contacts_check").is(":checked");
     let showNewsletters = $("#newsletter_check").is(":checked");
-    let allRows = $(".contact_list_row:not(.header_row)");
+    let allRows = $("#contacts_table_wrapper .item_row:not(.header_row)");
 
     allRows.hide();
 
@@ -767,7 +767,7 @@ $("#contact_choice_wrapper input").on("change", function() {
 $("#copy_addresses_button").on("click", async function() {
     const $email_modal = $("#email_copied_result .small_modal");
     const emails = [];
-    $(".contact_list_row:not(.header_row):visible").each(function() {
+    $("#contacts_table_wrapper .item_row:not(.header_row):visible").each(function() {
         const email = $(this).find(".email").text().trim();
         if (email && !emails.includes(email)) emails.push(email);
     });
@@ -833,10 +833,10 @@ $("#newsletter_preview_modal form").on("submit", function (e) {
     const $modal = $("#newsletter_preview_modal");
 
     // 1) Grab values from *inside* the newsletter modal
-    const titleRaw = $("#newsletter_preview_modal #title").val().trim();
+    const titleRaw = $("#newsletter_preview_modal #newsletter_title").val().trim();
     const title    = titleRaw || "NEWSLETTER";
 
-    const tagsRaw = $("#newsletter_preview_modal #tags").val().trim();
+    const tagsRaw = $("#newsletter_preview_modal #newsletter_tags").val().trim();
     const tags = tagsRaw
         ? tagsRaw.toLowerCase().split(/\s*,\s*/).filter(Boolean)
         : [];
@@ -1050,7 +1050,7 @@ async function loadNewsletters() {
 
       // Build row HTML
       const row = $(`
-        <div class="newsletter_row">
+        <div class="item_row">
           <a href="${url}" target="_blank" class="newsletter_title">${title}</a>
           <div class="newsletter_date">${formattedDate}</div>
         </div>

@@ -26,7 +26,7 @@
     font-weight: bold;
 }
 
-.contact_list_row{
+#contacts_table_wrapper .item_row{
     display: grid;
     gap: 10px;
     grid-template-columns: .5fr 1fr 80px;
@@ -69,7 +69,15 @@
     width: max-content;
 }
 
-#previous_newsletters .newsletter_row{
+/* NEWSLETTER SECTION */
+
+#newsletter_table_wrapper .header{
+    display: grid;
+    gap: 10px;
+    grid-template-columns: 1fr 1fr;
+}
+
+#newsletter_table_wrapper .item_row{
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 20px;
