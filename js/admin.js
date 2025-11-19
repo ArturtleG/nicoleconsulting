@@ -14,6 +14,7 @@ import {
     deleteDoc,
     storage,
     storageRef,
+    getStorage,
     uploadBytes,
     uploadBytesResumable,
     getDownloadURL,
@@ -90,9 +91,32 @@ $(function () {
 
 
     // --------------------------------------------------
-    // B) IMAGE PREVIEW / DRAG & DROP (UNCHANGED)
+    // B) IMAGE PREVIEW / DRAG & DROP
     // --------------------------------------------------
-    const $dropArea   = $("#image_drop_area");
+
+    setupFileUpload({
+        inputSelector: "#image",
+        dropSelector: "#image_drop_area",
+        previewSelector: "#image_preview",
+        removeButtonSelector: "#remove_cover_button",
+        fileFilter: (file) => {
+            if (!file.type.startsWith("image/")) {
+            alert("Please upload an image file.");
+            return false;
+            }
+            return true;
+        },
+        previewRenderer: (file, $preview) => {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+            $preview
+                .attr("src", e.target.result)
+                .show();
+            };
+            reader.readAsDataURL(file);
+        },
+    });
+ /*   const $dropArea   = $(".upload-drop-area");
     const $fileInput  = $("#image");
     const $previewImg = $("#image_preview");
 
@@ -135,7 +159,7 @@ $(function () {
             $fileInput[0].files = e.originalEvent.dataTransfer.files;
             handleImage(file);
         }
-    });
+    }); */
 
 
     // --------------------------------------------------
@@ -143,12 +167,13 @@ $(function () {
     // --------------------------------------------------
     $("#new_post_button").click(function () {
         // reset the HTML form
-        $("#post_form")[0].reset();
+        $("#modal_post_form form")[0].reset();
         // clear the trix editor
-        document.querySelector("trix-editor").editor.loadHTML("");
+        //document.querySelector("trix-editor").editor.loadHTML("");
+        $("#modal_post_form trix-editor")[0].editor.loadHTML("");
 
         // hide any old cover-preview
-        $("#image_preview").hide();
+        $("#image_preview").attr("src","").hide();
 
         // clear any “original-…” data so we know this is truly a CREATE
         $("#modal_post_form")
@@ -163,9 +188,8 @@ $(function () {
             });
 
         // reset headings/buttons
-        $("#form_heading").text("New Post");
-        $("#post_button").text("Publish Post");
-        $("#modal_post_form").removeClass("hidden");
+        $("#modal_post_form .form_heading").text("New Post");
+        $("#modal_post_form [type='submit']").text("Publish Post");
     });
 
 
@@ -485,8 +509,8 @@ $(function () {
             console.log("Modal data:", $modal.data("hearts"));
 
             // 5) Update UI text
-            $("#form_heading").text("Edit Post");
-            $("#post_button").text("Save Changes");
+            $("#modal_post_form .form_heading").text("Edit Post");
+            $("#modal_post_form [type='submit']").text("Save Changes");
 
             // 6) Show the modal
             $modal.removeClass("hidden");
@@ -512,7 +536,7 @@ $(function () {
 
     $(".close_button").click(function () {
         console.log("Close button clicked");
-        $(this).closest(".modal").addClass("hidden");
+        $(this).closest(".modal_wrapper").addClass("hidden");
     });
 
     $("#remove_cover_button").click(function(e){
@@ -533,6 +557,29 @@ $(function () {
         console.log("filter button fading in");
         $("#clear_filter").text(`${tag} (${numPosts})`).fadeIn(800);
     });
+
+    setupFileUpload({
+        inputSelector: "#newsletter_input",
+        dropSelector: "#file_drop_area",
+        previewSelector: "#file_preview",
+        removeButtonSelector: "#remove_file_button",
+        fileFilter: (file) => {
+            const isPdf =
+            file.type === "application/pdf" || /\.pdf$/i.test(file.name);
+            if (!isPdf) {
+                alert("Please upload a PDF file.");
+                return false;
+            }
+            return true;
+        },
+        previewRenderer: (file, $preview) => {
+            // For PDF, just show filename (or icon + name)
+            $preview
+            .text(file.name)
+            .show();
+        },
+    });
+
 
 }); // end of $(function())
 
@@ -708,11 +755,8 @@ $("#contact_choice_wrapper input").on("change", function() {
     allRows.hide();
 
     allRows.each(function(){
-        console.log($(this));
         const isContact    = $(this).find(".subscription.contact").length > 0;
         const isNewsletter = $(this).find(".subscription.newsletter").length > 0;
-
-        console.log("isContact:", isContact, "isNewsletter:", isNewsletter);
 
         if(showContacts && isContact || showNewsletters && isNewsletter){
             $(this).show();
@@ -749,3 +793,365 @@ $("#copy_addresses_button").on("click", async function() {
         alert("Clipboard access failed. Try manually copying.");
     }
 });
+
+/*** UPLOAD NEWSLETTERS */
+
+
+$("#newsletter_open_button").on("click", () => {
+    // reset the HTML form
+        $("#newsletter_preview_modal form")[0].reset();
+        // clear the trix editor
+        //document.querySelector("trix-editor").editor.loadHTML("");
+        $("#newsletter_preview_modal trix-editor")[0].editor.loadHTML("");
+
+        // hide any old cover-preview
+        $("#file_preview").empty().hide();
+
+        // clear data
+        $("#newsletter_preview_modal")
+        .removeClass("hidden")
+            .data({
+                
+            });
+
+        // reset headings/buttons
+        $("#newsletter_preview_modal .form_heading").text("New Newsletter");
+        $("#newsletter_preview_modal [type='submit']").text("Publish Newsletter");
+});
+
+/*$("#upload_newsletter_button").on("click", () => {
+    $("#newsletter_pdf_input").trigger("click");
+});*/
+
+// helper: safe filename
+const safeName = (name) => name.replace(/[^\w.\-]+/g, "_");
+
+// Handle newsletter form submit
+$("#newsletter_preview_modal form").on("submit", function (e) {
+    e.preventDefault();
+
+    const $modal = $("#newsletter_preview_modal");
+
+    // 1) Grab values from *inside* the newsletter modal
+    const titleRaw = $("#newsletter_preview_modal #title").val().trim();
+    const title    = titleRaw || "NEWSLETTER";
+
+    const tagsRaw = $("#newsletter_preview_modal #tags").val().trim();
+    const tags = tagsRaw
+        ? tagsRaw.toLowerCase().split(/\s*,\s*/).filter(Boolean)
+        : [];
+
+    // Trix writes HTML into the hidden input
+    const noteHtml = $("#newsletter_note").val() || "";
+
+    // 2) Get the PDF file from newsletter_input
+    const fileInput = document.getElementById("newsletter_input");
+    const file = fileInput.files && fileInput.files[0];
+
+    if (!file) {
+        alert("Please select a PDF newsletter file.");
+        return;
+    }
+
+    // 3) Validate PDF and size
+    const isPdf = file.type === "application/pdf" || /\.pdf$/i.test(file.name);
+    if (!isPdf) {
+        alert("Please select a valid PDF file.");
+        return;
+    }
+
+    const MAX_MB = 25;
+    if (file.size > MAX_MB * 1024 * 1024) {
+        alert(`PDF must be ≤ ${MAX_MB} MB.`);
+        return;
+    }
+
+    // 4) Build a storage path
+    const ts   = Date.now();
+    const path = `newsletters/${ts}_${safeName(file.name)}`;
+    const fileRef = storageRef(storage, path);
+
+    const metadata = {
+        contentType: "application/pdf",
+        cacheControl: "public,max-age=31536000,immutable"
+    };
+
+    // 5) Start upload with progress
+    const task = uploadBytesResumable(fileRef, file, metadata);
+
+    $("#upload_progress").show().val(0);
+    $("#upload_status").text("Uploading newsletter…");
+
+    task.on(
+        "state_changed",
+        (snap) => {
+            const pct = Math.round(
+                (snap.bytesTransferred / snap.totalBytes) * 100
+            );
+            $("#upload_progress").val(pct);
+            $("#upload_status").text(`Uploading… ${pct}%`);
+        },
+        (err) => {
+            console.error("Upload error:", err);
+            $("#upload_status").text("Upload failed.");
+            alert("Upload failed. Check console for details.");
+            $("#upload_progress").hide().val(0);
+        },
+        async () => {
+            try {
+                // 6) Upload done → get URL
+                const url = await getDownloadURL(task.snapshot.ref);
+
+                // 7) Save metadata in Firestore
+                await addDoc(collection(db, "newsletters_data"), {
+                    kind: "newsletter_pdf",
+                    title,
+                    path,
+                    url,
+                    filename: file.name,
+                    note: noteHtml,
+                    tags,
+                    uploadedAt: serverTimestamp(),
+                });
+
+                $("#upload_status").text("Upload complete.").fadeOut(800);
+                $("#upload_progress").hide().val(0);
+
+                // 8) Reset form, clear preview, close modal
+                fileInput.value = "";
+                $("#file_preview").empty().hide();
+                $("#remove_file_button").hide();
+                $("#newsletter_preview_modal trix-editor")[0].editor.loadHTML("");
+                $("#newsletter_preview_modal form")[0].reset();
+                $modal.addClass("hidden");
+
+                // 9) Refresh the list of newsletters
+                loadNewsletters();
+
+            } catch (error) {
+                console.error("Error saving newsletter:", error);
+                $("#upload_status").text("Error saving newsletter.");
+                alert("Newsletter saved upload failed. Check console for details.");
+            }
+        }
+    );
+});
+
+/*// change → upload
+$("#newsletter_pdf_input").on("change", function () {
+    const file = this.files?.[0];
+    if (!file) return;
+
+    // 1) Validate PDF and size (tweak size limit as you like)
+    const isPdf = file.type === "application/pdf" || /\.pdf$/i.test(file.name);
+    if (!isPdf) { alert("Please select a PDF."); this.value = ""; return; }
+
+    const MAX_MB = 25;
+
+    if (file.size > MAX_MB * 1024 * 1024) {
+        alert(`PDF must be ≤ ${MAX_MB} MB.`);
+        this.value = "";
+        return;
+    }
+
+    // 2) Build a storage path
+    // Default: newsletters/<timestamp>_<filename>.pdf
+    // If you prefer per-post or per-slug: `posts/${slug}/assets/${...}`
+    const ts = Date.now();
+    const path = `newsletters/${ts}_${safeName(file.name)}`;
+    const title    =  "NEWSLETTER";
+
+    const storage = getStorage();
+    const fileRef = storageRef(storage, path);
+
+    // 3) Optional metadata + nice caching
+    const metadata = {
+        contentType: "application/pdf",
+        cacheControl: "public,max-age=31536000,immutable"
+    };
+
+    // 4) Start upload with progress
+    const task = uploadBytesResumable(fileRef, file, metadata);
+
+    $("#upload_progress").show().val(0);
+    $("#upload_status").text("Uploading…");
+
+    task.on("state_changed",
+        (snap) => {
+            const pct = Math.round((snap.bytesTransferred / snap.totalBytes) * 100);
+            $("#upload_progress").val(pct);
+            $("#upload_status").text(`Uploading… ${pct}%`);
+        },
+        (err) => {
+            console.error("Upload error:", err);
+            $("#upload_status").text("Upload failed.");
+            alert("Upload failed. Check console for details.");
+            $("#upload_progress").hide().val(0);
+            this.value = "";
+        },
+        async () => {
+            // 5) Done → get URL
+            const url = await getDownloadURL(task.snapshot.ref);
+            $("#upload_status").text("Upload complete.").fadeOut(800);
+
+            $("#upload_progress").hide().val(0);
+            this.value = "";
+
+            // 6) (Optional) Save a record in Firestore so you can list/download later
+            // You can replace this with setDoc(doc(db,"posts",slug), {newsletterUrl: url}, {merge:true})
+            await addDoc(collection(db, "newsletters_data"), {
+                kind: "newsletter_pdf",
+                title,
+                path,
+                url,
+                filename: file.name,
+                uploadedAt: serverTimestamp()
+            });
+
+            // 7) Show the URL or wire it into your UI as needed
+            console.log("PDF available at:", url);
+            loadNewsletters();
+        }
+    );
+});*/
+
+
+
+async function loadNewsletters() {
+  const container = $("#previous_newsletters");
+  container.empty().append("<p>Loading newsletters...</p>");
+
+  try {
+    // Query newsletters_data ordered by uploadedAt descending
+    const q = query(collection(db, "newsletters_data"), orderBy("uploadedAt", "desc"));
+    const querySnapshot = await getDocs(q);
+
+    container.empty(); // clear the "Loading..." message
+
+    if (querySnapshot.empty) {
+      container.append("<p>No newsletters found.</p>");
+      return;
+    }
+
+    querySnapshot.forEach(docSnap => {
+      const data = docSnap.data();
+      const title = data.title || "Untitled";
+      const url = data.url || "#";
+      const uploadedAt = data.uploadedAt?.toDate
+        ? data.uploadedAt.toDate()
+        : new Date();
+      
+      // Format date
+      const formattedDate = uploadedAt.toLocaleDateString("en-US", {
+        year: "numeric",
+        month: "short",
+        day: "numeric",
+      });
+
+      // Build row HTML
+      const row = $(`
+        <div class="newsletter_row">
+          <a href="${url}" target="_blank" class="newsletter_title">${title}</a>
+          <div class="newsletter_date">${formattedDate}</div>
+        </div>
+      `);
+
+      container.append(row);
+    });
+
+  } catch (error) {
+    console.error("Error loading newsletters:", error);
+    container.html(`<p style="color:red;">Error loading newsletters. Check console for details.</p>`);
+  }
+}
+
+// Call on page load or after upload completes
+$(document).ready(() => {
+  loadNewsletters();
+});
+
+// ------------------------------
+    // FILE HANDLING
+    // ------------------------------
+
+function setupFileUpload({
+    inputSelector, 
+    dropSelector, 
+    previewSelector, 
+    removeButtonSelector, 
+    fileFilter,        // (file) => true/false
+    previewRenderer,   // (file, $preview) => void
+}) {
+    const $input   = $(inputSelector);
+    const $drop    = $(dropSelector);
+    const $preview = $(previewSelector);
+    const $remove  = $(removeButtonSelector);
+
+    if (!$input.length || !$drop.length || !$preview.length) {
+        console.warn("setupFileUpload: missing element(s) for", { inputSelector, dropSelector, previewSelector });
+        return;
+    }
+
+    // Helper to clear
+    function clearFile() {
+        $input.val("");                 // clear file input
+        $preview.hide().empty();        // hide/remove preview
+        console.log("file cleared");
+        $remove.hide();
+    }
+
+    // When file is selected via the label
+    $input.on("change", function () {
+        const file = this.files?.[0];
+        if (!file) {
+            clearFile();
+            return;
+        }
+        if (fileFilter && !fileFilter(file)) {
+            clearFile();
+            return;
+        }
+        previewRenderer(file, $preview);
+        $remove.show();
+    });
+
+    // Drag & drop styling
+    $drop.on("dragover", function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+        $drop.addClass("dragover");
+    });
+
+    $drop.on("dragleave", function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+        $drop.removeClass("dragover");
+    });
+
+    $drop.on("drop", function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+        $drop.removeClass("dragover");
+
+        const file = e.originalEvent.dataTransfer.files?.[0];
+        if (!file) return;
+
+        if (fileFilter && !fileFilter(file)) {
+            clearFile();
+            return;
+        }
+
+        // Push it into the real input so your submit handlers see it
+        $input[0].files = e.originalEvent.dataTransfer.files;
+
+        previewRenderer(file, $preview);
+        $remove.show();
+    });
+
+    // Remove / clear button
+    if ($remove.length) {
+        $remove.on("click", function () {
+            clearFile();
+        });
+    }
+}
