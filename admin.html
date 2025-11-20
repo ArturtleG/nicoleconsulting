@@ -125,8 +125,20 @@
                                 <div class="header">
                                     <h4>Contacts</h4>
                                     <div id="contact_choice_wrapper">
-                                        <div class="contact">Contacts <input id="contacts_check" type="checkbox" checked></div>
-                                        <div class="newsletter">Newsletters <input id="newsletter_check" type="checkbox" checked></div>
+                                        <div class="contact">
+                                            Contacts
+                                            <input id="contacts_check" type="checkbox" checked>
+                                            <div class="items_count"></div>
+                                        </div>
+                                        <div class="newsletter">
+                                            Newsletters
+                                            <input id="newsletter_check" type="checkbox" checked>
+                                            <div class="items_count"></div>
+                                        </div>
+                                        <div id="total_contacts_count" class="items_count">
+                                            <div class="label">Total:</div>
+                                            <div class="total_count"></div>
+                                        </div>
                                         <div>
                                             <button id="copy_addresses_button" class="primary-button square_button copy_button"></button>
                                             <div id="email_copied_result" class="small_modal_wrapper">
@@ -135,7 +147,7 @@
                                         </div>
                                     </div>
                                 </div>
-                                <div class="item_row header_row">  
+                                <div class="item_row header_row">
                                     <div>Name</div>
                                     <div>Email</div>
                                     <div></div>
@@ -146,17 +158,27 @@
                     </div>
                 </div>
             </section>
-            <section>
+            <section class="dark">
                 <div class="row">
                     <div id="previous_newsletters_wrapper_">
                         <div id="newsletter_table_wrapper" class="blob white">
                             <div class="">
                                 <div class="header">
                                     <h4>Previous Newsletters</h4>
+                                    <div id="newsletter_total_count" class="items_count">
+                                        <div class="label">Total:</div>
+                                        <div class="total_count"></div>
+                                    </div>
                                 </div>
                                 <div class="item_row header_row">  
                                     <div>Title</div>
-                                    <div>Date</div>
+                                    <div>File name</div>
+                                    <div>Upload Date</div>
+                                    <div>Scheduled Date</div>
+                                    <!--<div class="note_wrapper">
+                                        <div>Tags</div>
+                                        <div>Note</div>
+                                    </div>-->
                                 </div>
                             </div>
                             <div id="previous_newsletters"></div>
@@ -171,6 +193,16 @@
                     </div>
                 </div>
             </section>
+             <footer id="footer">
+                <div id="logo_wrapper">
+                    <img class="logo" src="images/Initials.svg" alt="Nicole McRree initials logo" loading="lazy"/>
+                    <div>&copy; 2025 Nicole McRee Consulting. All rights reserved.</div>
+                </div>
+                <a id="email_link" href="mailto:nicole@mcree-ed.consulting" target="_blank">
+                    <img class="emailIcon" src="images/emailIconW.svg" alt="email icon"  loading="lazy"/>
+                    nicole@mcree-ed.consulting
+                </a>
+            </footer>
             <div id="newsletter_preview_modal" class="modal_wrapper hidden"> <!-- NEWSLETTER MODAL -->
                 <div id="newsletter_preview_wrapper" class="modal">
                     <div class="form_heading">New Newsletter</div>

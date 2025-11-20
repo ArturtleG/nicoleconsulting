@@ -719,20 +719,18 @@ async function loadContactsAndNewsletters() {
       return;
     }
 
-    const html = rows.map(({ name, email, isContact, isNewsletter }) => `
-      <div class="item_row">
+    const html = rows.map(({name, email, isContact, isNewsletter }, i) => 
+        `<div class="item_row">
         <div>${escapeHtml(name)}</div>
         <div class="email">${escapeHtml(email)}</div>
         <div class="type_contact_wrapper">
           <div class="subscription ${isContact ? "contact" : ""}"></div>
           <div class="subscription ${isNewsletter ? "newsletter" : ""}"></div>
         </div>
-      </div>
-    `).join("");
+      </div>`).join("");
 
     $wrapper.html(html);
 
-    // Optionally: trigger your existing filter once to apply initial state
     $("#contact_choice_wrapper input").trigger("change");
 
   } catch (err) {
@@ -746,22 +744,54 @@ async function loadContactsAndNewsletters() {
 // call it when the admin page is ready / after auth completes
 $(loadContactsAndNewsletters);
 
-
 $("#contact_choice_wrapper input").on("change", function() {
-    let showContacts = $("#contacts_check").is(":checked");
-    let showNewsletters = $("#newsletter_check").is(":checked");
-    let allRows = $("#contacts_table_wrapper .item_row:not(.header_row)");
+    console.log("Filter change triggered");
+    const showContacts    = $("#contacts_check").is(":checked");
+    const showNewsletters = $("#newsletter_check").is(":checked");
+    const $allRows = $("#contacts_table_wrapper .item_row:not(.header_row)");
 
-    allRows.hide();
+    console.log($allRows.length + " rows found");
 
-    allRows.each(function(){
-        const isContact    = $(this).find(".subscription.contact").length > 0;
-        const isNewsletter = $(this).find(".subscription.newsletter").length > 0;
+    let visibleUsers       = 0;
+    let visibleContacts    = 0;
+    let visibleNewsletters = 0;
+    let visibleIndex       = 0; // for striping
 
-        if(showContacts && isContact || showNewsletters && isNewsletter){
-            $(this).show();
+    $allRows.each(function() {
+        console.log("Processing a row");
+        const $row         = $(this);
+        const isContact    = $row.find(".subscription.contact").length > 0;
+        const isNewsletter = $row.find(".subscription.newsletter").length > 0;
+
+        const shouldShow =
+            (showContacts && isContact) ||
+            (showNewsletters && isNewsletter);
+
+        if (shouldShow) {
+            $row.show();
+
+            // --- striping on visible rows ---
+            $row.removeClass("even_row odd_row");
+            const stripeClass = (visibleIndex % 2 === 0) ? "even_row" : "odd_row";
+            $row.addClass(stripeClass);
+            visibleIndex++;
+
+            // --- visible counters ---
+            visibleUsers++;
+            if (isContact)    visibleContacts++;
+            if (isNewsletter) visibleNewsletters++;
+        } else {
+            $row.hide();
         }
     });
+
+    // Update your displayed counters using your selectors:
+    $(".contact .items_count").text(visibleContacts);
+    $(".newsletter .items_count").text(visibleNewsletters);
+
+    // Pick the one that matches your actual HTML:
+    // e.g. <span id="total_count" class="items_count"></span>
+    $("#total_contacts_count .total_count").text(visibleUsers);
 });
 
 $("#copy_addresses_button").on("click", async function() {
@@ -819,10 +849,6 @@ $("#newsletter_open_button").on("click", () => {
         $("#newsletter_preview_modal [type='submit']").text("Publish Newsletter");
 });
 
-/*$("#upload_newsletter_button").on("click", () => {
-    $("#newsletter_pdf_input").trigger("click");
-});*/
-
 // helper: safe filename
 const safeName = (name) => name.replace(/[^\w.\-]+/g, "_");
 
@@ -840,6 +866,15 @@ $("#newsletter_preview_modal form").on("submit", function (e) {
     const tags = tagsRaw
         ? tagsRaw.toLowerCase().split(/\s*,\s*/).filter(Boolean)
         : [];
+
+    const sendDateValue = $("#newsletter_send_date").val();
+    if (!sendDateValue) {
+        alert("Please select a date to send.");
+        return;
+    }
+
+    const scheduledSendAt = new Date(sendDateValue);
+
 
     // Trix writes HTML into the hidden input
     const noteHtml = $("#newsletter_note").val() || "";
@@ -912,6 +947,7 @@ $("#newsletter_preview_modal form").on("submit", function (e) {
                     note: noteHtml,
                     tags,
                     uploadedAt: serverTimestamp(),
+                    scheduledSendAt
                 });
 
                 $("#upload_status").text("Upload complete.").fadeOut(800);
@@ -937,133 +973,133 @@ $("#newsletter_preview_modal form").on("submit", function (e) {
     );
 });
 
-/*// change → upload
-$("#newsletter_pdf_input").on("change", function () {
-    const file = this.files?.[0];
-    if (!file) return;
+let newsletterRows = [];
 
-    // 1) Validate PDF and size (tweak size limit as you like)
-    const isPdf = file.type === "application/pdf" || /\.pdf$/i.test(file.name);
-    if (!isPdf) { alert("Please select a PDF."); this.value = ""; return; }
+// Helper to safely render note HTML as plain text if you ever want that
+// (you’re currently trusting `noteHtml`, so leave as-is unless you change that)
+function formatDateOrDash(date) {
+  if (!date) return "—";
+  return date.toLocaleDateString("en-US", {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+  });
+}
 
-    const MAX_MB = 25;
-
-    if (file.size > MAX_MB * 1024 * 1024) {
-        alert(`PDF must be ≤ ${MAX_MB} MB.`);
-        this.value = "";
-        return;
-    }
-
-    // 2) Build a storage path
-    // Default: newsletters/<timestamp>_<filename>.pdf
-    // If you prefer per-post or per-slug: `posts/${slug}/assets/${...}`
-    const ts = Date.now();
-    const path = `newsletters/${ts}_${safeName(file.name)}`;
-    const title    =  "NEWSLETTER";
-
-    const storage = getStorage();
-    const fileRef = storageRef(storage, path);
-
-    // 3) Optional metadata + nice caching
-    const metadata = {
-        contentType: "application/pdf",
-        cacheControl: "public,max-age=31536000,immutable"
-    };
-
-    // 4) Start upload with progress
-    const task = uploadBytesResumable(fileRef, file, metadata);
-
-    $("#upload_progress").show().val(0);
-    $("#upload_status").text("Uploading…");
-
-    task.on("state_changed",
-        (snap) => {
-            const pct = Math.round((snap.bytesTransferred / snap.totalBytes) * 100);
-            $("#upload_progress").val(pct);
-            $("#upload_status").text(`Uploading… ${pct}%`);
-        },
-        (err) => {
-            console.error("Upload error:", err);
-            $("#upload_status").text("Upload failed.");
-            alert("Upload failed. Check console for details.");
-            $("#upload_progress").hide().val(0);
-            this.value = "";
-        },
-        async () => {
-            // 5) Done → get URL
-            const url = await getDownloadURL(task.snapshot.ref);
-            $("#upload_status").text("Upload complete.").fadeOut(800);
-
-            $("#upload_progress").hide().val(0);
-            this.value = "";
-
-            // 6) (Optional) Save a record in Firestore so you can list/download later
-            // You can replace this with setDoc(doc(db,"posts",slug), {newsletterUrl: url}, {merge:true})
-            await addDoc(collection(db, "newsletters_data"), {
-                kind: "newsletter_pdf",
-                title,
-                path,
-                url,
-                filename: file.name,
-                uploadedAt: serverTimestamp()
-            });
-
-            // 7) Show the URL or wire it into your UI as needed
-            console.log("PDF available at:", url);
-            loadNewsletters();
-        }
-    );
-});*/
-
-
-
-async function loadNewsletters() {
-  const container = $("#previous_newsletters");
-  container.empty().append("<p>Loading newsletters...</p>");
+async function loadNewsletters(filterTag = null) {
+  const $container = $("#previous_newsletters");
+  $container.empty().append("<p>Loading newsletters...</p>");
 
   try {
-    // Query newsletters_data ordered by uploadedAt descending
-    const q = query(collection(db, "newsletters_data"), orderBy("uploadedAt", "desc"));
-    const querySnapshot = await getDocs(q);
+    const q = query(
+      collection(db, "newsletters_data"),
+      orderBy("uploadedAt", "desc")
+    );
+    const snap = await getDocs(q);
 
-    container.empty(); // clear the "Loading..." message
+    newsletterRows = [];
 
-    if (querySnapshot.empty) {
-      container.append("<p>No newsletters found.</p>");
+    snap.forEach(docSnap => {
+      const data = docSnap.data();
+      const tags = data.tags || [];
+
+      // optional future filter by tag
+      if (filterTag && !tags.includes(filterTag)) return;
+
+      const title    = data.title    || "Untitled";
+      const url      = data.url      || "#";
+      const filename = data.filename || "Untitled";
+
+      const uploadedAt = data.uploadedAt?.toDate
+        ? data.uploadedAt.toDate()
+        : null;
+
+      const scheduledSendAt = data.scheduledSendAt?.toDate
+        ? data.scheduledSendAt.toDate()
+        : null;
+
+      const noteHtml = data.note || "No note";
+      const tagsHtml = tags
+        .map(tag => `
+          <button 
+            class="newsletter_tag" 
+            data-tag="${tag}">
+            ${tag}
+          </button>
+        `)
+        .join("");
+
+      newsletterRows.push({
+        id: docSnap.id,
+        title,
+        url,
+        filename,
+        uploadedAt,
+        scheduledSendAt,
+        uploadedAtFormatted: formatDateOrDash(uploadedAt),
+        scheduledSendAtFormatted: formatDateOrDash(scheduledSendAt),
+        tagsHtml,
+        noteHtml,
+      });
+    });
+
+    $container.empty();
+
+    if (!newsletterRows.length) {
+      $container.append("<p>No newsletters found.</p>");
+      $("#newsletter_total_count").text("0");
       return;
     }
 
-    querySnapshot.forEach(docSnap => {
-      const data = docSnap.data();
-      const title = data.title || "Untitled";
-      const url = data.url || "#";
-      const uploadedAt = data.uploadedAt?.toDate
-        ? data.uploadedAt.toDate()
-        : new Date();
-      
-      // Format date
-      const formattedDate = uploadedAt.toLocaleDateString("en-US", {
-        year: "numeric",
-        month: "short",
-        day: "numeric",
-      });
+    // Render with alternating row colors
+    const html = newsletterRows
+      .map((row, index) => {
+        const stripeClass = ""; //index % 2 === 0 ? "even_row" : "odd_row";
+        return `
+          <div class="item_row ${stripeClass}">
+            <a href="${row.url}" target="_blank" class="primary-button newsletter_title">
+              ${row.title}
+            </a>
+            <div href="${row.url}" class="newsletter_filename">
+              ${row.filename}
+            </div>
+            <div class="newsletter_date">
+              ${row.uploadedAtFormatted}
+            </div>
+            <div class="newsletter_date">
+              ${row.scheduledSendAtFormatted}
+            </div>
+            <div class="note_wrapper">
+              <div class="newsletter_tag_wrapper">
+                ${row.tagsHtml}
+              </div>
+              <div class="newsletter_note">
+                ${row.noteHtml}
+              </div>
+            </div>
+          </div>
+        `;
+      })
+      .join("");
 
-      // Build row HTML
-      const row = $(`
-        <div class="item_row">
-          <a href="${url}" target="_blank" class="newsletter_title">${title}</a>
-          <div class="newsletter_date">${formattedDate}</div>
-        </div>
-      `);
+    $container.html(html);
 
-      container.append(row);
-    });
+    // Update total count
+    $("#newsletter_total_count .total_count").text(newsletterRows.length);
 
   } catch (error) {
     console.error("Error loading newsletters:", error);
-    container.html(`<p style="color:red;">Error loading newsletters. Check console for details.</p>`);
+    $container.html(
+      `<p style="color:red;">Error loading newsletters. Check console for details.</p>`
+    );
+    $("#newsletter_total_count").text("0");
   }
 }
+
+// Call on page load or after upload completes
+$(document).ready(() => {
+  loadNewsletters();
+});
 
 // Call on page load or after upload completes
 $(document).ready(() => {
