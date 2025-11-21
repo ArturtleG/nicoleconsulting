@@ -840,9 +840,13 @@ $("#newsletter_open_button").on("click", () => {
         // clear data
         $("#newsletter_preview_modal")
         .removeClass("hidden")
-            .data({
-                
-            });
+        .data({
+            mode: "create",
+            docId: null,
+            originalPath: null,
+            originalURL: null,
+            originalFilename: null
+        });
 
         // reset headings/buttons
         $("#newsletter_preview_modal .form_heading").text("New Newsletter");
@@ -853,10 +857,16 @@ $("#newsletter_open_button").on("click", () => {
 const safeName = (name) => name.replace(/[^\w.\-]+/g, "_");
 
 // Handle newsletter form submit
-$("#newsletter_preview_modal form").on("submit", function (e) {
+/*$("#newsletter_preview_modal form").on("submit", function (e) {
     e.preventDefault();
 
     const $modal = $("#newsletter_preview_modal");
+
+    const mode = $modal.data("mode") || "create"; // NEW 👈
+    const docId = $modal.data("docId") || null;
+
+    const originalPath = $modal.data("originalPath") || null;
+    const originalURL  = $modal.data("originalURL") || null;
 
     // 1) Grab values from *inside* the newsletter modal
     const titleRaw = $("#newsletter_preview_modal #newsletter_title").val().trim();
@@ -864,10 +874,10 @@ $("#newsletter_preview_modal form").on("submit", function (e) {
 
     const tagsRaw = $("#newsletter_preview_modal #newsletter_tags").val().trim();
     const tags = tagsRaw
-        ? tagsRaw.toLowerCase().split(/\s*,\s*/).filter(Boolean)
-        : [];
+        ? tagsRaw.toLowerCase().split(/\s*,\s*///).filter(Boolean)
+        //: [];
 
-    const sendDateValue = $("#newsletter_send_date").val();
+    /*const sendDateValue = $("#newsletter_send_date").val();
     if (!sendDateValue) {
         alert("Please select a date to send.");
         return;
@@ -938,7 +948,8 @@ $("#newsletter_preview_modal form").on("submit", function (e) {
                 const url = await getDownloadURL(task.snapshot.ref);
 
                 // 7) Save metadata in Firestore
-                await addDoc(collection(db, "newsletters_data"), {
+                if (mode === "edit" && docId) {
+                await setDoc(doc(db, "newsletters_data", docId), {
                     kind: "newsletter_pdf",
                     title,
                     path,
@@ -946,9 +957,23 @@ $("#newsletter_preview_modal form").on("submit", function (e) {
                     filename: file.name,
                     note: noteHtml,
                     tags,
-                    uploadedAt: serverTimestamp(),
+                    uploadedAt: data.uploadedAt || serverTimestamp(),
+                    editedAt: serverTimestamp(),
                     scheduledSendAt
-                });
+                }, { merge: true }); 
+                } else {
+                    await addDoc(collection(db, "newsletters_data"), {
+                        kind: "newsletter_pdf",
+                        title,
+                        path,
+                        url,
+                        filename: file.name,
+                        note: noteHtml,
+                        tags,
+                        uploadedAt: serverTimestamp(),
+                        scheduledSendAt
+                    });
+                }
 
                 $("#upload_status").text("Upload complete.").fadeOut(800);
                 $("#upload_progress").hide().val(0);
@@ -968,6 +993,182 @@ $("#newsletter_preview_modal form").on("submit", function (e) {
                 console.error("Error saving newsletter:", error);
                 $("#upload_status").text("Error saving newsletter.");
                 alert("Newsletter saved upload failed. Check console for details.");
+            }
+        }
+    );
+});*/
+// Handle newsletter form submit (CREATE + EDIT)
+$("#newsletter_preview_modal form").on("submit", function (e) {
+    e.preventDefault();
+
+    const $modal = $("#newsletter_preview_modal");
+
+    // Are we creating or editing?
+    const mode           = $modal.data("mode") || "create";   // "create" or "edit"
+    const docId          = $modal.data("docId") || null;
+    const originalPath   = $modal.data("originalPath") || null;
+    const originalURL    = $modal.data("originalURL") || null;
+    const originalName   = $modal.data("originalFilename") || null;
+
+    // 1) Grab values from *inside* the newsletter modal
+    const titleRaw = $("#newsletter_preview_modal #newsletter_title").val().trim();
+    const title    = titleRaw || "NEWSLETTER";
+
+    const tagsRaw = $("#newsletter_preview_modal #newsletter_tags").val().trim();
+    const tags = tagsRaw
+        ? tagsRaw.toLowerCase().split(/\s*,\s*/).filter(Boolean)
+        : [];
+
+    const sendDateValue = $("#newsletter_send_date").val();
+
+
+    if (!sendDateValue) {
+        alert("Please select a date to send.");
+        return;
+    }
+
+    const [year, month, day] = sendDateValue.split("-").map(Number);
+    const scheduledSendAt    = new Date(year, month - 1, day, 0, 0, 0);
+
+    // Trix writes HTML into the hidden input
+    const noteHtml = $("#newsletter_note").val() || "";
+
+    // 2) Get the PDF file from newsletter_input (may be null in EDIT mode)
+    const fileInput = document.getElementById("newsletter_input");
+    const file = fileInput.files && fileInput.files[0];
+
+    // --- CREATE requires a file, EDIT can reuse existing file ---
+    if (!file && mode === "create") {
+        alert("Please select a PDF newsletter file.");
+        return;
+    }
+
+    // If no new file in EDIT mode → just update metadata & bail
+    if (!file && mode === "edit" && docId && originalPath && originalURL) {
+        setDoc(doc(db, "newsletters_data", docId), {
+            kind: "newsletter_pdf",
+            title,
+            path: originalPath,
+            url: originalURL,
+            filename: originalName || "newsletter.pdf",
+            note: noteHtml,
+            tags,
+            scheduledSendAt,
+            editedAt: serverTimestamp()
+        }, { merge: true })
+        .then(() => {
+            // Clean up UI + reload list
+            fileInput.value = "";
+            $("#file_preview").empty().hide();
+            $("#remove_file_button").hide();
+            $("#newsletter_preview_modal trix-editor")[0].editor.loadHTML("");
+            $("#newsletter_preview_modal form")[0].reset();
+            $modal.addClass("hidden");
+            loadNewsletters();
+        })
+        .catch(err => {
+            console.error("Error updating newsletter (no new file):", err);
+            alert("Failed to save newsletter changes.");
+        });
+
+        return; // IMPORTANT: stop here, no upload
+    }
+
+    // 3) From here on, we KNOW we have a new file (create OR edit)
+    // Validate PDF and size
+    const isPdf = file.type === "application/pdf" || /\.pdf$/i.test(file.name);
+    if (!isPdf) {
+        alert("Please select a valid PDF file.");
+        return;
+    }
+
+    const MAX_MB = 25;
+    if (file.size > MAX_MB * 1024 * 1024) {
+        alert(`PDF must be ≤ ${MAX_MB} MB.`);
+        return;
+    }
+
+    // 4) Build a storage path
+    const ts   = Date.now();
+    const path = `newsletters/${ts}_${safeName(file.name)}`;
+    const fileRef = storageRef(storage, path);
+
+    const metadata = {
+        contentType: "application/pdf",
+        cacheControl: "public,max-age=31536000,immutable"
+    };
+
+    // 5) Start upload with progress
+    const task = uploadBytesResumable(fileRef, file, metadata);
+
+    $("#upload_progress").show().val(0);
+    $("#upload_status").text("Uploading newsletter…");
+
+    task.on(
+        "state_changed",
+        (snap) => {
+            const pct = Math.round(
+                (snap.bytesTransferred / snap.totalBytes) * 100
+            );
+            $("#upload_progress").val(pct);
+            $("#upload_status").text(`Uploading… ${pct}%`);
+        },
+        (err) => {
+            console.error("Upload error:", err);
+            $("#upload_status").text("Upload failed.");
+            alert("Upload failed. Check console for details.");
+            $("#upload_progress").hide().val(0);
+        },
+        async () => {
+            try {
+                // 6) Upload done → get URL
+                const url = await getDownloadURL(task.snapshot.ref);
+
+                // 7) Save metadata in Firestore (create vs edit)
+                if (mode === "edit" && docId) {
+                    await setDoc(doc(db, "newsletters_data", docId), {
+                        kind: "newsletter_pdf",
+                        title,
+                        path,
+                        url,
+                        filename: file.name,
+                        note: noteHtml,
+                        tags,
+                        scheduledSendAt,
+                        editedAt: serverTimestamp()
+                    }, { merge: true });
+                } else {
+                    await addDoc(collection(db, "newsletters_data"), {
+                        kind: "newsletter_pdf",
+                        title,
+                        path,
+                        url,
+                        filename: file.name,
+                        note: noteHtml,
+                        tags,
+                        uploadedAt: serverTimestamp(),
+                        scheduledSendAt
+                    });
+                }
+
+                $("#upload_status").text("Upload complete.").fadeOut(800);
+                $("#upload_progress").hide().val(0);
+
+                // 8) Reset form, clear preview, close modal
+                fileInput.value = "";
+                $("#file_preview").empty().hide();
+                $("#remove_file_button").hide();
+                $("#newsletter_preview_modal trix-editor")[0].editor.loadHTML("");
+                $("#newsletter_preview_modal form")[0].reset();
+                $modal.addClass("hidden");
+
+                // 9) Refresh the list of newsletters
+                loadNewsletters();
+
+            } catch (error) {
+                console.error("Error saving newsletter:", error);
+                $("#upload_status").text("Error saving newsletter.");
+                alert("Newsletter save failed. Check console for details.");
             }
         }
     );
@@ -1040,6 +1241,7 @@ async function loadNewsletters(filterTag = null) {
         scheduledSendAtFormatted: formatDateOrDash(scheduledSendAt),
         tagsHtml,
         noteHtml,
+        path: data.path || null, 
       });
     });
 
@@ -1051,35 +1253,66 @@ async function loadNewsletters(filterTag = null) {
       return;
     }
 
-    // Render with alternating row colors
     const html = newsletterRows
-      .map((row, index) => {
-        const stripeClass = ""; //index % 2 === 0 ? "even_row" : "odd_row";
-        return `
-          <div class="item_row ${stripeClass}">
-            <a href="${row.url}" target="_blank" class="primary-button newsletter_title">
-              ${row.title}
-            </a>
-            <div href="${row.url}" class="newsletter_filename">
-              ${row.filename}
-            </div>
-            <div class="newsletter_date">
-              ${row.uploadedAtFormatted}
-            </div>
-            <div class="newsletter_date">
-              ${row.scheduledSendAtFormatted}
-            </div>
-            <div class="note_wrapper">
-              <div class="newsletter_tag_wrapper">
-                ${row.tagsHtml}
-              </div>
-              <div class="newsletter_note">
-                ${row.noteHtml}
-              </div>
-            </div>
-          </div>
-        `;
-      })
+        .map((row, index) => {
+            //const stripeClass = ""; //index % 2 === 0 ? "even_row" : "odd_row";
+            return `
+                <div class="row">
+                    <div class="newsletter_table_wrapper blob white">
+                        <div class="">
+                            <div class="item_row header_row">  
+                                <div>Title</div>
+                                <div>File name</div>
+                                <div>Upload Date</div>
+                                <div>Scheduled Date</div>
+                            </div>
+                        </div>
+                        <div class="item_row">
+                            <a href="${row.url}" target="_blank" class="primary-button newsletter_title item">
+                                ${row.title}
+                            </a>
+                            <div href="${row.url}" class="newsletter_filename item">
+                                ${row.filename}
+                            </div>
+                            <div class="newsletter_date item">
+                                ${row.uploadedAtFormatted}
+                            </div>
+                            <div class="newsletter_date item">
+                                ${row.scheduledSendAtFormatted}
+                            </div>
+                            <div class="note_wrapper">
+                                <div class="newsletter_tag_wrapper">
+                                    ${row.tagsHtml}
+                                </div>
+                                <div class="newsletter_note">
+                                    ${row.noteHtml}
+                                </div>
+                                <div class="button_wrapper">
+                                    <button 
+                                        class="edit-newsletter-btn primary-button" 
+                                        data-id="${row.id}" 
+                                        data-path="${row.path || ""}">
+                                        edit
+                                    </button>
+                                    <button 
+                                        class="delete-newsletter-btn primary-button" 
+                                        data-id="${row.id}" 
+                                        data-path="${row.path || ""}">
+                                        delete
+                                    </button>
+                                    <button 
+                                        class="push-newsletter-btn primary-button" 
+                                        data-id="${row.id}" 
+                                        data-path="${row.path || ""}">
+                                        push
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        })
       .join("");
 
     $container.html(html);
@@ -1101,10 +1334,404 @@ $(document).ready(() => {
   loadNewsletters();
 });
 
-// Call on page load or after upload completes
-$(document).ready(() => {
-  loadNewsletters();
+// Turn an email into a Firestore-safe doc id
+function emailKey(email = "") {
+  return email
+    .trim()
+    .toLowerCase()
+    .replace(/[.#$/\[\]]/g, "_"); // Firestore doc-id safe
+}
+
+// Super simple HTML -> text
+function stripHtml(html = "") {
+  return html.replace(/<[^>]*>/g, "").replace(/\s+/g, " ").trim();
+}
+
+/***** DELETE NEWSLETTER *****/
+
+$(document).on("click", ".delete-newsletter-btn", async function () {
+  const id   = $(this).data("id");
+  const path = $(this).data("path") || null;
+
+  if (!id) {
+    console.error("No newsletter id on delete button");
+    return;
+  }
+
+  const ok = window.confirm("Delete this newsletter? This cannot be undone.");
+  if (!ok) return;
+
+  try {
+    // 1) Delete Firestore doc
+    await deleteDoc(doc(db, "newsletters_data", id));
+
+    // 2) Try to delete the file from Storage too (if we know the path)
+    if (path) {
+      try {
+        const fileRef = storageRef(storage, path);
+        await deleteObject(fileRef);
+      } catch (err) {
+        // Non-fatal: doc is gone, file cleanup failed
+        console.warn("Failed to delete newsletter file from Storage:", err);
+      }
+    }
+
+    // 3) Reload list
+    await loadNewsletters();
+
+  } catch (err) {
+    console.error("Error deleting newsletter:", err);
+    alert("Failed to delete newsletter. Check console for details.");
+  }
 });
+
+/***** EDIT */
+
+$(document).on("click", ".edit-newsletter-btn", async function () {
+    const id   = $(this).data("id");
+    const path = $(this).data("path") || null;
+
+    if (!id) return console.error("Missing doc ID for edit.");
+
+    try {
+        const docRef = doc(db, "newsletters_data", id);
+        const snap = await getDoc(docRef);
+        if (!snap.exists()) {
+            alert("Newsletter not found.");
+            return;
+        }
+
+        const data = snap.data();
+
+        const $modal = $("#newsletter_preview_modal");
+
+        // Populate fields
+        $("#newsletter_title").val(data.title || "");
+        $("#newsletter_tags").val((data.tags || []).join(", "));
+        $("#newsletter_preview_modal trix-editor")[0].editor.loadHTML(data.note || "");
+
+        // Show existing file name in preview (not changing the file until user uploads)
+        if (data.filename) {
+            $("#file_preview")
+                .text(data.filename)
+                .show();
+            $("#remove_file_button").show();
+        } else {
+            $("#file_preview").empty().hide();
+            $("#remove_file_button").hide();
+        }
+
+        if (data.scheduledSendAt && data.scheduledSendAt.toDate) {
+            const dt = data.scheduledSendAt.toDate();  // JS Date in local time
+
+            const yyyy = dt.getFullYear();
+            const mm   = String(dt.getMonth() + 1).padStart(2, "0"); // 0-based month
+            const dd   = String(dt.getDate()).padStart(2, "0");
+
+            // This is what <input type="date"> expects: YYYY-MM-DD (local)
+            $("#newsletter_send_date").val(`${yyyy}-${mm}-${dd}`);
+        } else {
+            $("#newsletter_send_date").val("");
+        }
+
+        // Store BOOTSTRAP data
+        $modal
+            .removeClass("hidden")
+            .data({
+                mode: "edit",
+                docId: id,
+                originalPath: data.path || null,
+                originalURL: data.url || null,
+                originalFilename: data.filename || ""
+            });
+
+        // Update UI labels
+        $modal.find(".form_heading").text("Edit Newsletter");
+        $modal.find("[type='submit']").text("Save Changes");
+
+    } catch (err) {
+        console.error("Edit-load error:", err);
+        alert("Failed to load newsletter.");
+    }
+});
+
+/*** PUSH */
+
+$(document).on("click", ".push-newsletter-btn", async function () {
+    const newsletterId = $(this).data("id");
+    if (!newsletterId) {
+        alert("Missing newsletter id.");
+        return;
+    }
+
+    const confirmSend = confirm(
+        "Send this newsletter to all newsletter subscribers who haven't received it yet?"
+    );
+    if (!confirmSend) return;
+
+    const $btn = $(this);
+    const originalText = $btn.text();
+
+    $btn.prop("disabled", true).text("Pushing…");
+
+    try {
+        const { createdCount, skippedCount, totalSubscribers } =
+        await pushNewsletter(newsletterId);
+
+        alert(
+        [
+            `Total subscribers: ${totalSubscribers}`,
+            `New emails queued: ${createdCount}`,
+            `Already sent (skipped): ${skippedCount}`,
+        ].join("\n")
+        );
+    } catch (err) {
+        console.error("Error pushing newsletter:", err);
+        alert("Error pushing newsletter. Check console for details.");
+    } finally {
+        $btn.prop("disabled", false).text(originalText);
+    }
+});
+
+async function pushNewsletter(newsletterId, options = {}) {
+    const {
+        testEmails = null,
+        dedupeInTests = false,
+    } = options;
+
+    if (!newsletterId) throw new Error("Missing newsletter id");
+
+    // 1) Load the newsletter doc
+    const newsletterRef = doc(db, "newsletters_data", newsletterId);
+    const newsletterSnap = await getDoc(newsletterRef);
+
+    if (!newsletterSnap.exists()) {
+        throw new Error("Newsletter not found");
+    }
+
+    const data      = newsletterSnap.data();
+    const title     = data.title || "Newsletter";
+    const url       = data.url;
+    const filename  = data.filename || "newsletter.pdf";
+    const noteHtml  = data.note || "";
+    const noteText  = stripHtml(noteHtml);
+
+    if (!url) {
+        throw new Error("Newsletter is missing a PDF URL.");
+    }
+
+    const mailCol = collection(db, "mail"); // Trigger Email watches this
+
+    // 2) Load existing recipients for dedupe (used in live mode and optionally in test)
+    const recipientsCol  = collection(newsletterRef, "recipients");
+    const recipientsSnap = await getDocs(recipientsCol);
+    const alreadySent    = new Set();
+
+    recipientsSnap.forEach(recSnap => {
+        alreadySent.add(recSnap.id); // doc id = emailKey
+    });
+
+    // ----------------------------------------
+    // TEST MODE: explicit list of emails
+    // ----------------------------------------
+    if (Array.isArray(testEmails) && testEmails.length > 0) {
+        let createdCount = 0;
+        let skippedCount = 0;
+        const tasks = [];
+
+        for (const rawEmail of testEmails) {
+            const email = rawEmail.trim().toLowerCase();
+            if (!email) continue;
+
+            const key = emailKey(email);
+
+            if (dedupeInTests && alreadySent.has(key)) {
+                skippedCount++;
+                continue;
+            }
+
+            createdCount++;
+
+            const subject = `[TEST] Roots & Reason – ${title}`;
+            const htmlBody = `
+                <p>Hi,</p>
+                <p><strong>This is a TEST send.</strong></p>
+                ${noteHtml}
+                <p>You can view the newsletter here:</p>
+                <p><a href="${url}">${filename}</a></p>
+                <p>— Nicole</p>
+            `;
+
+            const textBody = `Hi,
+
+                [TEST SEND]
+
+                ${noteText}
+
+                View the newsletter: ${url}
+
+                — Nicole`;
+
+            const mailDoc = {
+                to: [email],
+                message: {
+                subject,
+                text: textBody,
+                html: htmlBody,
+                },
+                newsletterId,
+                test: true,
+                dedupeInTests,
+                createdAt: serverTimestamp(),
+            };
+
+            // IMPORTANT: in test mode we do NOT write to recipients/{emailKey}
+            // so live dedupe remains clean.
+            tasks.push(addDoc(mailCol, mailDoc));
+        }
+
+        await Promise.all(tasks);
+
+        return {
+            mode: "test",
+            dedupeInTests,
+            createdCount,
+            skippedCount,
+            totalSubscribers: testEmails.length,
+        };
+    }
+
+    // ----------------------------------------
+    // LIVE MODE: real subscribers + dedupe + recipient tracking
+    // ----------------------------------------
+
+    // 3) Build the subscriber list (same as before)
+    const [contactsSnap, newslettersSnap] = await Promise.all([
+        getDocs(collection(db, "contacts")),
+        getDocs(collection(db, "newsletters_email")),
+    ]);
+
+    const byEmail = new Map();
+
+    function upsert({ name, email, isNewsletter = false }) {
+        if (!email) return;
+        const key = email.trim().toLowerCase();
+        const existing = byEmail.get(key) || {
+        name: "",
+        email: key,
+        isNewsletter: false,
+        };
+
+        const nextName = existing.name || name || "";
+
+        byEmail.set(key, {
+        name: nextName,
+        email: key,
+        isNewsletter: existing.isNewsletter || isNewsletter,
+        });
+    }
+
+    contactsSnap.forEach(docSnap => {
+        const d = docSnap.data() || {};
+        const email = (d.email || docSnap.id || "").toString();
+        const name  = (d.name  || "").toString();
+        upsert({ name, email, isNewsletter: false });
+    });
+
+    newslettersSnap.forEach(docSnap => {
+        const d = docSnap.data() || {};
+        const email = (d.email || docSnap.id || "").toString();
+        const name  = (d.name  || "").toString();
+        upsert({ name, email, isNewsletter: true });
+    });
+
+    const subscribers = [];
+    byEmail.forEach(entry => {
+        if (entry.isNewsletter) subscribers.push(entry);
+    });
+
+    if (!subscribers.length) {
+        return {
+        mode: "live",
+        createdCount: 0,
+        skippedCount: 0,
+        totalSubscribers: 0,
+        };
+    }
+
+    let createdCount = 0;
+    let skippedCount = 0;
+    const tasks = [];
+
+    for (const sub of subscribers) {
+        const email = sub.email;
+        if (!email) continue;
+
+        const key = emailKey(email);
+
+        if (alreadySent.has(key)) {
+        skippedCount++;
+        continue;
+        }
+
+        createdCount++;
+
+        const namePart = sub.name ? ` ${sub.name}` : "";
+
+        const subject = `Roots & Reason – ${title}`;
+        const htmlBody = `
+            <p>Hi${namePart},</p>
+            ${noteHtml}
+            <p>You can view the newsletter here:</p>
+            <p><a href="${url}">${filename}</a></p>
+            <p>— Nicole</p>
+        `;
+
+        const textBody = `Hi${namePart},
+
+            ${noteText}
+
+            View the newsletter: ${url}
+
+            — Nicole`;
+
+        const mailDoc = {
+            to: [email],
+            message: {
+                subject,
+                text: textBody,
+                html: htmlBody,
+            },
+            newsletterId,
+            createdAt: serverTimestamp(),
+            };
+
+            const recipientRef = doc(recipientsCol, key);
+
+            tasks.push(
+            addDoc(mailCol, mailDoc).then(() =>
+                setDoc(
+                recipientRef,
+                {
+                    email,
+                    name: sub.name || "",
+                    sentAt: serverTimestamp(),
+                },
+                { merge: true }
+                )
+            )
+        );
+    }
+
+    await Promise.all(tasks);
+
+    return {
+        mode: "live",
+        createdCount,
+        skippedCount,
+        totalSubscribers: subscribers.length,
+    };
+}
 
 // ------------------------------
     // FILE HANDLING

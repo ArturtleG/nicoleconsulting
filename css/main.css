@@ -46,6 +46,7 @@ hr {
     margin: 2rem 10%;
 }
 
+.u-flex-left { display: flex; justify-content: left; align-items: center; gap:10px}
 .u-flex-center { display: flex; justify-content: center !important; align-items: center; }
 .u-flex-right { display: flex; justify-content: right; align-items: center; }
 .u-flex-wrap   { flex-wrap: wrap; }
