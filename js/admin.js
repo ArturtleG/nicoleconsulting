@@ -1458,6 +1458,72 @@ $(document).on("click", ".edit-newsletter-btn", async function () {
 /*** PUSH */
 
 $(document).on("click", ".push-newsletter-btn", async function () {
+  const newsletterId = $(this).data("newsletter-id");
+  if (!newsletterId) {
+    alert("Missing newsletter id on this button.");
+    return;
+  }
+
+  // Decide mode from radio buttons
+  //const mode = $("input[name='newsletter_send_mode']:checked").val() || "live";
+  const isTest = true;
+  const dedupeInTests = true;
+
+
+  let options = {};
+  let confirmMsg = "";
+
+  if (isTest) {
+    //const raw = $("#newsletter_test_emails").val() || "";
+    /*const testEmails = raw
+      .split(",")
+      .map(e => e.trim())
+      .filter(Boolean);
+    */
+    const testEmails = ["agarcia@nscds.org","artgarcia77@gmail.com"];
+    if (!testEmails.length) {
+      alert("Enter at least one test email.");
+      return;
+    }
+
+    options = { testEmails, dedupeInTests };
+    confirmMsg =
+      `Send TEST newsletter to:\n\n` +
+      testEmails.join("\n") +
+      `\n\nDedupe in test mode: ${dedupeInTests ? "YES" : "NO"}`;
+  } else {
+    confirmMsg =
+      "Send LIVE newsletter to all newsletter subscribers?\n\n" +
+      "This will create email jobs in the /mail collection.";
+  }
+
+  if (!window.confirm(confirmMsg)) return;
+
+  // UI feedback on the button
+  const $btn = $(this);
+  const originalText = $btn.text();
+  $btn.prop("disabled", true).text("Sending…");
+
+  try {
+    const result = await pushNewsletter(newsletterId, options);
+    const modeLabel = result.isTestMode ? "TEST" : "LIVE";
+
+    alert(
+      `${modeLabel} send complete.\n\n` +
+      `Emails created this run: ${result.createdCount}\n` +
+      `Skipped (already sent): ${result.skippedCount}\n` +
+      `Total subscribers in DB: ${result.totalSubscribers}\n` +
+      `Total targets this run: ${result.totalTargets}`
+    );
+  } catch (err) {
+    console.error("pushNewsletter failed:", err);
+    alert("Failed to push newsletter. Check console for details.");
+  } finally {
+    $btn.prop("disabled", false).text(originalText);
+  }
+});
+
+/*$(document).on("click", ".push-newsletter-btn", async function () {
     const newsletterId = $(this).data("id");
     if (!newsletterId) {
         alert("Missing newsletter id.");
@@ -1491,246 +1557,196 @@ $(document).on("click", ".push-newsletter-btn", async function () {
     } finally {
         $btn.prop("disabled", false).text(originalText);
     }
-});
+});*/
 
 async function pushNewsletter(newsletterId, options = {}) {
-    const {
-        testEmails = null,
-        dedupeInTests = false,
-    } = options;
+  const {
+    testEmails = [],    // array of strings, or empty for live send
+    dedupeInTests = false,
+  } = options;
 
-    if (!newsletterId) throw new Error("Missing newsletter id");
+  if (!newsletterId) {
+    throw new Error("Missing newsletter id");
+  }
 
-    // 1) Load the newsletter doc
-    const newsletterRef = doc(db, "newsletters_data", newsletterId);
-    const newsletterSnap = await getDoc(newsletterRef);
+  // ----------------------------
+  // 1) Load the newsletter doc
+  // ----------------------------
+  const newsletterRef = doc(db, "newsletters_data", newsletterId);
+  const newsletterSnap = await getDoc(newsletterRef);
 
-    if (!newsletterSnap.exists()) {
-        throw new Error("Newsletter not found");
-    }
+  if (!newsletterSnap.exists()) {
+    throw new Error("Newsletter not found");
+  }
 
-    const data      = newsletterSnap.data();
-    const title     = data.title || "Newsletter";
-    const url       = data.url;
-    const filename  = data.filename || "newsletter.pdf";
-    const noteHtml  = data.note || "";
-    const noteText  = stripHtml(noteHtml);
+  const data = newsletterSnap.data();
+  const title    = data.title || "Newsletter";
+  const url      = data.url;
+  const filename = data.filename || "newsletter.pdf";
+  const noteHtml = data.note || "";
+  const noteText = stripHtml(noteHtml);
 
-    if (!url) {
-        throw new Error("Newsletter is missing a PDF URL.");
-    }
+  if (!url) {
+    throw new Error("Newsletter is missing a PDF URL.");
+  }
 
-    const mailCol = collection(db, "mail"); // Trigger Email watches this
+  const isTestMode = Array.isArray(testEmails) && testEmails.length > 0;
 
-    // 2) Load existing recipients for dedupe (used in live mode and optionally in test)
-    const recipientsCol  = collection(newsletterRef, "recipients");
-    const recipientsSnap = await getDocs(recipientsCol);
-    const alreadySent    = new Set();
+  // ----------------------------
+  // 2) Choose dedupe subcollection
+  //    - live  → "recipients"
+  //    - test  → "testRecipients"
+  //    so tests don't affect live dedupe
+  // ----------------------------
+  const recipientsCol = collection(
+    newsletterRef,
+    isTestMode ? "testRecipients" : "recipients"
+  );
 
-    recipientsSnap.forEach(recSnap => {
-        alreadySent.add(recSnap.id); // doc id = emailKey
+  const recipientsSnap = await getDocs(recipientsCol);
+  const alreadySent = new Set();
+  recipientsSnap.forEach(recSnap => {
+    alreadySent.add(recSnap.id); // doc id = emailKey(email)
+  });
+
+  // ----------------------------
+  // 3) Build subscriber map 
+  //    (similar to loadContactsAndNewsletters)
+  // ----------------------------
+  const subscribers = [];
+const seen = new Set();   // just in case there are dup docs for same email
+
+newslettersSnap.forEach(docSnap => {
+  const d = docSnap.data() || {};
+  const email = (d.email || docSnap.id || "").toString().trim().toLowerCase();
+  if (!email || seen.has(email)) return;
+
+  seen.add(email);
+
+  subscribers.push({
+    email,
+    name: (d.name || "").toString(),
+  });
+});
+
+  // ----------------------------
+  // 4) Decide targets:
+  //    - live: all subscribers
+  //    - test: only testEmails
+  // ----------------------------
+  let targets;
+
+  if (isTestMode) {
+    const set = new Set();
+    targets = [];
+
+    testEmails.forEach(raw => {
+      const email = (raw || "").trim().toLowerCase();
+      if (!email || set.has(email)) return;
+      set.add(email);
+
+      const entry =
+        byEmail.get(email) || { email, name: "", isNewsletter: false };
+      targets.push(entry);
     });
+  } else {
+    targets = subscribers;
+  }
 
-    // ----------------------------------------
-    // TEST MODE: explicit list of emails
-    // ----------------------------------------
-    if (Array.isArray(testEmails) && testEmails.length > 0) {
-        let createdCount = 0;
-        let skippedCount = 0;
-        const tasks = [];
-
-        for (const rawEmail of testEmails) {
-            const email = rawEmail.trim().toLowerCase();
-            if (!email) continue;
-
-            const key = emailKey(email);
-
-            if (dedupeInTests && alreadySent.has(key)) {
-                skippedCount++;
-                continue;
-            }
-
-            createdCount++;
-
-            const subject = `[TEST] Roots & Reason – ${title}`;
-            const htmlBody = `
-                <p>Hi,</p>
-                <p><strong>This is a TEST send.</strong></p>
-                ${noteHtml}
-                <p>You can view the newsletter here:</p>
-                <p><a href="${url}">${filename}</a></p>
-                <p>— Nicole</p>
-            `;
-
-            const textBody = `Hi,
-
-                [TEST SEND]
-
-                ${noteText}
-
-                View the newsletter: ${url}
-
-                — Nicole`;
-
-            const mailDoc = {
-                to: [email],
-                message: {
-                subject,
-                text: textBody,
-                html: htmlBody,
-                },
-                newsletterId,
-                test: true,
-                dedupeInTests,
-                createdAt: serverTimestamp(),
-            };
-
-            // IMPORTANT: in test mode we do NOT write to recipients/{emailKey}
-            // so live dedupe remains clean.
-            tasks.push(addDoc(mailCol, mailDoc));
-        }
-
-        await Promise.all(tasks);
-
-        return {
-            mode: "test",
-            dedupeInTests,
-            createdCount,
-            skippedCount,
-            totalSubscribers: testEmails.length,
-        };
-    }
-
-    // ----------------------------------------
-    // LIVE MODE: real subscribers + dedupe + recipient tracking
-    // ----------------------------------------
-
-    // 3) Build the subscriber list (same as before)
-    const [contactsSnap, newslettersSnap] = await Promise.all([
-        getDocs(collection(db, "contacts")),
-        getDocs(collection(db, "newsletters_email")),
-    ]);
-
-    const byEmail = new Map();
-
-    function upsert({ name, email, isNewsletter = false }) {
-        if (!email) return;
-        const key = email.trim().toLowerCase();
-        const existing = byEmail.get(key) || {
-        name: "",
-        email: key,
-        isNewsletter: false,
-        };
-
-        const nextName = existing.name || name || "";
-
-        byEmail.set(key, {
-        name: nextName,
-        email: key,
-        isNewsletter: existing.isNewsletter || isNewsletter,
-        });
-    }
-
-    contactsSnap.forEach(docSnap => {
-        const d = docSnap.data() || {};
-        const email = (d.email || docSnap.id || "").toString();
-        const name  = (d.name  || "").toString();
-        upsert({ name, email, isNewsletter: false });
-    });
-
-    newslettersSnap.forEach(docSnap => {
-        const d = docSnap.data() || {};
-        const email = (d.email || docSnap.id || "").toString();
-        const name  = (d.name  || "").toString();
-        upsert({ name, email, isNewsletter: true });
-    });
-
-    const subscribers = [];
-    byEmail.forEach(entry => {
-        if (entry.isNewsletter) subscribers.push(entry);
-    });
-
-    if (!subscribers.length) {
-        return {
-        mode: "live",
-        createdCount: 0,
-        skippedCount: 0,
-        totalSubscribers: 0,
-        };
-    }
-
-    let createdCount = 0;
-    let skippedCount = 0;
-    const tasks = [];
-
-    for (const sub of subscribers) {
-        const email = sub.email;
-        if (!email) continue;
-
-        const key = emailKey(email);
-
-        if (alreadySent.has(key)) {
-        skippedCount++;
-        continue;
-        }
-
-        createdCount++;
-
-        const namePart = sub.name ? ` ${sub.name}` : "";
-
-        const subject = `Roots & Reason – ${title}`;
-        const htmlBody = `
-            <p>Hi${namePart},</p>
-            ${noteHtml}
-            <p>You can view the newsletter here:</p>
-            <p><a href="${url}">${filename}</a></p>
-            <p>— Nicole</p>
-        `;
-
-        const textBody = `Hi${namePart},
-
-            ${noteText}
-
-            View the newsletter: ${url}
-
-            — Nicole`;
-
-        const mailDoc = {
-            to: [email],
-            message: {
-                subject,
-                text: textBody,
-                html: htmlBody,
-            },
-            newsletterId,
-            createdAt: serverTimestamp(),
-            };
-
-            const recipientRef = doc(recipientsCol, key);
-
-            tasks.push(
-            addDoc(mailCol, mailDoc).then(() =>
-                setDoc(
-                recipientRef,
-                {
-                    email,
-                    name: sub.name || "",
-                    sentAt: serverTimestamp(),
-                },
-                { merge: true }
-                )
-            )
-        );
-    }
-
-    await Promise.all(tasks);
-
+  if (!targets.length) {
     return {
-        mode: "live",
-        createdCount,
-        skippedCount,
-        totalSubscribers: subscribers.length,
+      createdCount: 0,
+      skippedCount: 0,
+      totalSubscribers: subscribers.length,
+      totalTargets: 0,
+      isTestMode,
     };
+  }
+
+  // ----------------------------
+  // 5) Create docs in /mail for Trigger Email
+  // ----------------------------
+  const mailCol = collection(db, "mail");
+
+  let createdCount = 0;
+  let skippedCount = 0;
+  const tasks = [];
+
+  // live → always dedupe
+  // test → dedupe only if dedupeInTests === true
+  const shouldDedupe = !isTestMode || (isTestMode && dedupeInTests);
+
+  for (const sub of targets) {
+    const email = sub.email;
+    if (!email) continue;
+
+    const key = emailKey(email);
+
+    if (shouldDedupe && alreadySent.has(key)) {
+      skippedCount++;
+      continue;
+    }
+
+    createdCount++;
+
+    const namePart = sub.name ? ` ${sub.name}` : "";
+
+    const subject = `Roots & Reason – ${title}`;
+    const htmlBody = `
+      <p>Hi${namePart},</p>
+      ${noteHtml}
+      <p>You can view the newsletter here:</p>
+      <p><a href="${url}">${filename}</a></p>
+      <p>— Nicole</p>
+    `;
+
+    const textBody = `Hi${namePart},
+
+${noteText}
+
+View the newsletter: ${url}
+
+— Nicole`;
+
+    const mailDoc = {
+      to: [email],
+      message: {
+        subject,
+        text: textBody,
+        html: htmlBody,
+      },
+      newsletterId,
+      mode: isTestMode ? "test" : "live",
+      createdAt: serverTimestamp(),
+    };
+
+    const recipientRef = doc(recipientsCol, key);
+
+    tasks.push(
+      addDoc(mailCol, mailDoc)
+        .then(() =>
+          setDoc(
+            recipientRef,
+            {
+              email,
+              name: sub.name || "",
+              sentAt: serverTimestamp(),
+            },
+            { merge: true }
+          )
+        )
+    );
+  }
+
+  await Promise.all(tasks);
+
+  return {
+    createdCount,
+    skippedCount,
+    totalSubscribers: subscribers.length,
+    totalTargets: targets.length,
+    isTestMode,
+  };
 }
 
 // ------------------------------
