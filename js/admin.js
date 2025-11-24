@@ -8,6 +8,7 @@ import {
     serverTimestamp,
     doc,
     setDoc,
+    updateDoc,
     collection,
     getDoc,
     addDoc,
@@ -674,10 +675,17 @@ async function loadContactsAndNewsletters() {
     const byEmail = new Map();
 
     // helper to upsert an entry
-    const upsert = ({ name, email, isContact = false, isNewsletter = false }) => {
+    const upsert = ({ name, email, isContact = false, isNewsletter = false, unsubscribed = false }) => {
       if (!email) return;
       const key = email.trim().toLowerCase();
-      const existing = byEmail.get(key) || { name: "", email: key, isContact: false, isNewsletter: false };
+
+      const existing = byEmail.get(key) || {
+        name: "",
+        email: key,
+        isContact: false,
+        isNewsletter: false,
+        unsubscribed: false,
+      };
 
       // prefer non-empty name if one source has it
       const nextName = existing.name || name || "";
@@ -687,22 +695,27 @@ async function loadContactsAndNewsletters() {
         email: key,
         isContact: existing.isContact || isContact,
         isNewsletter: existing.isNewsletter || isNewsletter,
+        // once unsubscribed is true anywhere, keep it true
+        unsubscribed: existing.unsubscribed || unsubscribed,
       });
     };
 
+    // contacts collection
     contactsSnap.forEach(doc => {
       const d = doc.data() || {};
-      // doc.id is your sanitized email, but use field if available
       const email = (d.email || doc.id || "").toString();
       const name  = (d.name || "").toString();
       upsert({ name, email, isContact: true });
     });
 
+    // newsletters_email collection
     newslettersSnap.forEach(doc => {
       const d = doc.data() || {};
       const email = (d.email || doc.id || "").toString();
       const name  = (d.name || "").toString();
-      upsert({ name, email, isNewsletter: true });
+      // NOTE: read unsubscribed flag from Firestore
+      const unsubscribed = !!d.unsubscribed;
+      upsert({ name, email, isNewsletter: true, unsubscribed });
     });
 
     // Sort rows: by name then email (tweak as you like)
@@ -719,15 +732,24 @@ async function loadContactsAndNewsletters() {
       return;
     }
 
-    const html = rows.map(({name, email, isContact, isNewsletter }, i) => 
-        `<div class="item_row">
+    const html = rows.map(({ name, email, isContact, isNewsletter, unsubscribed }, i) =>
+      `<div class="item_row">
         <div>${escapeHtml(name)}</div>
         <div class="email">${escapeHtml(email)}</div>
         <div class="type_contact_wrapper">
           <div class="subscription ${isContact ? "contact" : ""}"></div>
           <div class="subscription ${isNewsletter ? "newsletter" : ""}"></div>
         </div>
-      </div>`).join("");
+        <label>
+          <input 
+            type="checkbox" 
+            class="subscriber-unsub-toggle"
+            data-email="${escapeHtml(email)}"
+            ${unsubscribed ? "checked" : ""}
+          />
+        </label>
+      </div>`
+    ).join("");
 
     $wrapper.html(html);
 
@@ -826,7 +848,6 @@ $("#copy_addresses_button").on("click", async function() {
 
 /*** UPLOAD NEWSLETTERS */
 
-
 $("#newsletter_open_button").on("click", () => {
     // reset the HTML form
         $("#newsletter_preview_modal form")[0].reset();
@@ -856,147 +877,6 @@ $("#newsletter_open_button").on("click", () => {
 // helper: safe filename
 const safeName = (name) => name.replace(/[^\w.\-]+/g, "_");
 
-// Handle newsletter form submit
-/*$("#newsletter_preview_modal form").on("submit", function (e) {
-    e.preventDefault();
-
-    const $modal = $("#newsletter_preview_modal");
-
-    const mode = $modal.data("mode") || "create"; // NEW 👈
-    const docId = $modal.data("docId") || null;
-
-    const originalPath = $modal.data("originalPath") || null;
-    const originalURL  = $modal.data("originalURL") || null;
-
-    // 1) Grab values from *inside* the newsletter modal
-    const titleRaw = $("#newsletter_preview_modal #newsletter_title").val().trim();
-    const title    = titleRaw || "NEWSLETTER";
-
-    const tagsRaw = $("#newsletter_preview_modal #newsletter_tags").val().trim();
-    const tags = tagsRaw
-        ? tagsRaw.toLowerCase().split(/\s*,\s*///).filter(Boolean)
-        //: [];
-
-    /*const sendDateValue = $("#newsletter_send_date").val();
-    if (!sendDateValue) {
-        alert("Please select a date to send.");
-        return;
-    }
-
-    const scheduledSendAt = new Date(sendDateValue);
-
-
-    // Trix writes HTML into the hidden input
-    const noteHtml = $("#newsletter_note").val() || "";
-
-    // 2) Get the PDF file from newsletter_input
-    const fileInput = document.getElementById("newsletter_input");
-    const file = fileInput.files && fileInput.files[0];
-
-    if (!file) {
-        alert("Please select a PDF newsletter file.");
-        return;
-    }
-
-    // 3) Validate PDF and size
-    const isPdf = file.type === "application/pdf" || /\.pdf$/i.test(file.name);
-    if (!isPdf) {
-        alert("Please select a valid PDF file.");
-        return;
-    }
-
-    const MAX_MB = 25;
-    if (file.size > MAX_MB * 1024 * 1024) {
-        alert(`PDF must be ≤ ${MAX_MB} MB.`);
-        return;
-    }
-
-    // 4) Build a storage path
-    const ts   = Date.now();
-    const path = `newsletters/${ts}_${safeName(file.name)}`;
-    const fileRef = storageRef(storage, path);
-
-    const metadata = {
-        contentType: "application/pdf",
-        cacheControl: "public,max-age=31536000,immutable"
-    };
-
-    // 5) Start upload with progress
-    const task = uploadBytesResumable(fileRef, file, metadata);
-
-    $("#upload_progress").show().val(0);
-    $("#upload_status").text("Uploading newsletter…");
-
-    task.on(
-        "state_changed",
-        (snap) => {
-            const pct = Math.round(
-                (snap.bytesTransferred / snap.totalBytes) * 100
-            );
-            $("#upload_progress").val(pct);
-            $("#upload_status").text(`Uploading… ${pct}%`);
-        },
-        (err) => {
-            console.error("Upload error:", err);
-            $("#upload_status").text("Upload failed.");
-            alert("Upload failed. Check console for details.");
-            $("#upload_progress").hide().val(0);
-        },
-        async () => {
-            try {
-                // 6) Upload done → get URL
-                const url = await getDownloadURL(task.snapshot.ref);
-
-                // 7) Save metadata in Firestore
-                if (mode === "edit" && docId) {
-                await setDoc(doc(db, "newsletters_data", docId), {
-                    kind: "newsletter_pdf",
-                    title,
-                    path,
-                    url,
-                    filename: file.name,
-                    note: noteHtml,
-                    tags,
-                    uploadedAt: data.uploadedAt || serverTimestamp(),
-                    editedAt: serverTimestamp(),
-                    scheduledSendAt
-                }, { merge: true }); 
-                } else {
-                    await addDoc(collection(db, "newsletters_data"), {
-                        kind: "newsletter_pdf",
-                        title,
-                        path,
-                        url,
-                        filename: file.name,
-                        note: noteHtml,
-                        tags,
-                        uploadedAt: serverTimestamp(),
-                        scheduledSendAt
-                    });
-                }
-
-                $("#upload_status").text("Upload complete.").fadeOut(800);
-                $("#upload_progress").hide().val(0);
-
-                // 8) Reset form, clear preview, close modal
-                fileInput.value = "";
-                $("#file_preview").empty().hide();
-                $("#remove_file_button").hide();
-                $("#newsletter_preview_modal trix-editor")[0].editor.loadHTML("");
-                $("#newsletter_preview_modal form")[0].reset();
-                $modal.addClass("hidden");
-
-                // 9) Refresh the list of newsletters
-                loadNewsletters();
-
-            } catch (error) {
-                console.error("Error saving newsletter:", error);
-                $("#upload_status").text("Error saving newsletter.");
-                alert("Newsletter saved upload failed. Check console for details.");
-            }
-        }
-    );
-});*/
 // Handle newsletter form submit (CREATE + EDIT)
 $("#newsletter_preview_modal form").on("submit", function (e) {
     e.preventDefault();
@@ -1458,7 +1338,8 @@ $(document).on("click", ".edit-newsletter-btn", async function () {
 /*** PUSH */
 
 $(document).on("click", ".push-newsletter-btn", async function () {
-  const newsletterId = $(this).data("newsletter-id");
+  const newsletterId = $(this).data("id");
+  console.log("Pushing newsletter id:", newsletterId);
   if (!newsletterId) {
     alert("Missing newsletter id on this button.");
     return;
@@ -1480,7 +1361,8 @@ $(document).on("click", ".push-newsletter-btn", async function () {
       .map(e => e.trim())
       .filter(Boolean);
     */
-    const testEmails = ["agarcia@nscds.org","artgarcia77@gmail.com"];
+    const testEmails = ["agarcia@nscds.org","artgarcia77@gmail.com","nicole@mcree-ed.consulting",
+        "web@mcree-ed.consulting"];
     if (!testEmails.length) {
       alert("Enter at least one test email.");
       return;
@@ -1523,42 +1405,6 @@ $(document).on("click", ".push-newsletter-btn", async function () {
   }
 });
 
-/*$(document).on("click", ".push-newsletter-btn", async function () {
-    const newsletterId = $(this).data("id");
-    if (!newsletterId) {
-        alert("Missing newsletter id.");
-        return;
-    }
-
-    const confirmSend = confirm(
-        "Send this newsletter to all newsletter subscribers who haven't received it yet?"
-    );
-    if (!confirmSend) return;
-
-    const $btn = $(this);
-    const originalText = $btn.text();
-
-    $btn.prop("disabled", true).text("Pushing…");
-
-    try {
-        const { createdCount, skippedCount, totalSubscribers } =
-        await pushNewsletter(newsletterId);
-
-        alert(
-        [
-            `Total subscribers: ${totalSubscribers}`,
-            `New emails queued: ${createdCount}`,
-            `Already sent (skipped): ${skippedCount}`,
-        ].join("\n")
-        );
-    } catch (err) {
-        console.error("Error pushing newsletter:", err);
-        alert("Error pushing newsletter. Check console for details.");
-    } finally {
-        $btn.prop("disabled", false).text(originalText);
-    }
-});*/
-
 async function pushNewsletter(newsletterId, options = {}) {
   const {
     testEmails = [],    // array of strings, or empty for live send
@@ -1596,7 +1442,6 @@ async function pushNewsletter(newsletterId, options = {}) {
   // 2) Choose dedupe subcollection
   //    - live  → "recipients"
   //    - test  → "testRecipients"
-  //    so tests don't affect live dedupe
   // ----------------------------
   const recipientsCol = collection(
     newsletterRef,
@@ -1610,16 +1455,22 @@ async function pushNewsletter(newsletterId, options = {}) {
   });
 
   // ----------------------------
-  // 3) Build subscriber map 
-  //    (similar to loadContactsAndNewsletters)
+  // 3) Build subscribers from newsletters_email only
   // ----------------------------
-  const subscribers = [];
-const seen = new Set();   // just in case there are dup docs for same email
+  const subscribersSnap = await getDocs(collection(db, "newsletters_email"));
 
-newslettersSnap.forEach(docSnap => {
+  const subscribers = [];
+  const seen = new Set(); // avoid duplicates
+
+  subscribersSnap.forEach(docSnap => {
   const d = docSnap.data() || {};
-  const email = (d.email || docSnap.id || "").toString().trim().toLowerCase();
+  const email = (d.email || docSnap.id || "")
+    .toString()
+    .trim()
+    .toLowerCase();
+
   if (!email || seen.has(email)) return;
+  if (d.unsubscribed === true) return; // ← NEW: skip unsubscribed
 
   seen.add(email);
 
@@ -1637,16 +1488,19 @@ newslettersSnap.forEach(docSnap => {
   let targets;
 
   if (isTestMode) {
-    const set = new Set();
+    const seenTest = new Set();
     targets = [];
+
+    // quick lookup from email → subscriber (for names, if they exist)
+    const lookup = new Map(subscribers.map(s => [s.email, s]));
 
     testEmails.forEach(raw => {
       const email = (raw || "").trim().toLowerCase();
-      if (!email || set.has(email)) return;
-      set.add(email);
+      if (!email || seenTest.has(email)) return;
+      seenTest.add(email);
 
-      const entry =
-        byEmail.get(email) || { email, name: "", isNewsletter: false };
+      // Either use subscriber info (with name) or just bare email
+      const entry = lookup.get(email) || { email, name: "" };
       targets.push(entry);
     });
   } else {
@@ -1690,37 +1544,74 @@ newslettersSnap.forEach(docSnap => {
     createdCount++;
 
     const namePart = sub.name ? ` ${sub.name}` : "";
+    const greeting = sub.name ? `Hi ${sub.name},` : "Hi there,";
 
-    const subject = `Roots & Reason – ${title}`;
+    const subject = `Roots & Reason - ${title}`;
+
+    // --- Footer (HTML & Text) ---
+    const unsubscribeEmail = "web@mcree-ed.consulting";
+
+    const footerHtml = `
+      <p style="font-size:12px; color:#555; margin-top:16px;">
+        You’re receiving this email because you signed up for the Roots &amp; Reason newsletter
+        at mcree-ed.consulting. If you no longer wish to receive these emails,
+        you can <a href="mailto:${unsubscribeEmail}?subject=Unsubscribe%20Roots%20%26%20Reason">
+        unsubscribe by email</a>.
+      </p>
+      <p style="font-size:12px; color:#555;">
+        McRee Ed Consulting · Illinois · USA
+      </p>
+    `;
+
+    const footerText = `
+        ---
+        You’re receiving this email because you signed up for the Roots & Reason newsletter
+        at mcree-ed.consulting. If you no longer wish to receive these emails, you can
+        unsubscribe by emailing ${unsubscribeEmail} with "Unsubscribe Roots & Reason"
+        in the subject line.
+
+        McRee Ed Consulting
+        Illinois, USA
+        `;
+
+    // --- Main bodies with footer appended ---
     const htmlBody = `
-      <p>Hi${namePart},</p>
+      <p>${greeting}</p>
       ${noteHtml}
       <p>You can view the newsletter here:</p>
       <p><a href="${url}">${filename}</a></p>
       <p>— Nicole</p>
+      <hr />
+      ${footerHtml}
     `;
 
-    const textBody = `Hi${namePart},
+    const textBody = `${greeting}
 
-${noteText}
+        ${noteText}
 
-View the newsletter: ${url}
+        View the newsletter: ${url}
 
-— Nicole`;
+        — Nicole
+        ${footerText}
+        `;
 
     const mailDoc = {
-      to: [email],
-      message: {
-        subject,
-        text: textBody,
-        html: htmlBody,
-      },
-      newsletterId,
-      mode: isTestMode ? "test" : "live",
-      createdAt: serverTimestamp(),
+        to: [email],
+        message: {
+            subject,
+            text: textBody,
+            html: htmlBody,
+        },
+        newsletterId,
+        mode: isTestMode ? "test" : "live",
+        createdAt: serverTimestamp(),
     };
 
     const recipientRef = doc(recipientsCol, key);
+
+    // If you still want to pause before actually sending, you can temporarily do:
+    // console.log("Would send to:", email, "mailDoc:", mailDoc);
+    // continue; // <-- prevents any writes
 
     tasks.push(
       addDoc(mailCol, mailDoc)
@@ -1740,6 +1631,8 @@ View the newsletter: ${url}
 
   await Promise.all(tasks);
 
+  console.log("email sent");
+
   return {
     createdCount,
     skippedCount,
@@ -1748,6 +1641,63 @@ View the newsletter: ${url}
     isTestMode,
   };
 }
+
+// Toggle unsubscribed flag for a given email
+async function setSubscriberUnsubscribed(email, flag) {
+  const cleanEmail = (email || "").trim().toLowerCase();
+  if (!cleanEmail) return;
+
+  const qRef = collection(db, "newsletters_email");
+  const q = query(qRef, where("email", "==", cleanEmail));
+  const snap = await getDocs(q);
+
+  if (snap.empty) {
+    console.warn("No subscriber doc found for email:", cleanEmail);
+    return;
+  }
+
+  const updates = [];
+  snap.forEach(docSnap => {
+    updates.push(
+      updateDoc(docSnap.ref, {
+        unsubscribed: !!flag,
+      })
+    );
+  });
+
+  await Promise.all(updates);
+  console.log("Unsubscribe flag updated for:", cleanEmail, "→", !!flag);
+}
+
+// Toggle unsubscribed flag in Firestore when checkbox is changed
+$(document).on("change", ".subscriber-unsub-toggle", async function () {
+  const email = $(this).data("email");
+  const flag = this.checked;
+
+  // Ask the user to type the email to confirm the change
+  const actionText = flag ? "unsubscribe" : "resubscribe";
+  
+  const input = prompt(
+    `To ${actionText} this subscriber, please type the email address:\n\n${email}`
+  );
+
+  // If cancelled or doesn't match, revert checkbox and cancel the update
+  if (!input || input.trim().toLowerCase() !== email.toLowerCase()) {
+    alert("Email did not match — no changes were made.");
+    this.checked = !flag;
+    return;
+  }
+
+  try {
+    console.log("Updating unsubscribe:", email, "→", flag);
+    await setSubscriberUnsubscribed(email, flag);
+  } catch (err) {
+    console.error("Failed to update unsubscribe flag:", err);
+    alert("There was an issue updating this subscriber.");
+    // Revert UI if Firestore write failed
+    this.checked = !flag;
+  }
+});
 
 // ------------------------------
     // FILE HANDLING

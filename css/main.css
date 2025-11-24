@@ -573,6 +573,9 @@ p:only-child {
     max-height: 200px;
     max-width: 250px;
     margin: 0 auto;
+}
+
+.border_radius{
     border-radius: 10px;
 }
 
@@ -831,10 +834,19 @@ input[type="checkbox"]:hover {
     box-shadow: 0 0 5px var(--color-primary);
 }
 
+.subscriber-unsub-toggle:checked {
+    background-color: #ff4d4d !important;
+    border-color: #cc0000;
+}
+
 input[type="checkbox"]:checked::after {
     content: "✔";
     font-size: 24px;
     color: white;
+}
+
+.subscriber-unsub-toggle:checked::after {
+    content: "✖" !important;
 }
 
 [for="subscribe_newsletter"]{

@@ -18,6 +18,12 @@
     grid-template-columns: .4fr 1fr;
 }
 
+.contacts_list_wrapper{
+    max-height: calc(100vh - 320px);
+    overflow-y: auto;
+    margin-top: 10px;
+}
+
 #contact_choice_wrapper{
     display: flex;
     gap: 20px;
@@ -67,7 +73,8 @@
 }
 
 #contacts_table_wrapper .item_row{
-    grid-template-columns: .5fr 1fr 80px;
+    grid-template-columns: .5fr 1fr 80px 32px;
+    margin: 5px 0;
 }
 
 .email{
