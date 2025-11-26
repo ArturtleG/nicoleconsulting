@@ -177,3 +177,11 @@
 .newsletter_note{
     padding: 20px;
 }
+
+#test_mode_wrapper{
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    align-items: center;
+    justify-content: center;
+}

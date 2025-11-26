@@ -117,51 +117,6 @@ $(function () {
             reader.readAsDataURL(file);
         },
     });
- /*   const $dropArea   = $(".upload-drop-area");
-    const $fileInput  = $("#image");
-    const $previewImg = $("#image_preview");
-
-    function handleImage(file) {
-        if (file && file.type.startsWith("image/")) {
-            const reader = new FileReader();
-            reader.onload = function (e) {
-                $previewImg.attr("src", e.target.result).show();
-            };
-            reader.readAsDataURL(file);
-        }
-    }
-
-  // When a file is selected via the “Upload Cover Image” label
-    $fileInput.on("change", function () {
-        const file = this.files[0];
-        handleImage(file);
-    });
-
-  // Drag & drop styling & logic
-    $dropArea.on("dragover", function (e) {
-        e.preventDefault();
-        e.stopPropagation();
-        $dropArea.addClass("dragover");
-    });
-
-    $dropArea.on("dragleave", function (e) {
-        e.preventDefault();
-        e.stopPropagation();
-        $dropArea.removeClass("dragover");
-    });
-
-    $dropArea.on("drop", function (e) {
-        e.preventDefault();
-        e.stopPropagation();
-        $dropArea.removeClass("dragover");
-        const file = e.originalEvent.dataTransfer.files[0];
-        if (file) {
-            // Update the hidden file input so form submission can see it
-            $fileInput[0].files = e.originalEvent.dataTransfer.files;
-            handleImage(file);
-        }
-    }); */
-
 
     // --------------------------------------------------
     // C) MODAL SHOW/HIDE FOR “NEW POST”
@@ -583,6 +538,73 @@ $(function () {
 
 
 }); // end of $(function())
+
+$(async function () {
+  const $testMode = $("#newsletter_test_mode");
+
+  try {
+    const settingsRef = doc(db, "settings", "newsletter");
+    const snap = await getDoc(settingsRef);
+
+    let testMode = true; // default: TEST mode
+    if (snap.exists()) {
+      const data = snap.data() || {};
+      if (typeof data.testMode === "boolean") {
+        testMode = data.testMode;
+      }
+    }
+
+    // Set checkbox from Firestore
+    $testMode.prop("checked", testMode);
+
+    // Attach handler (next step)
+    attachTestModeHandler(settingsRef, $testMode);
+
+  } catch (err) {
+    console.error("Failed to load newsletter test mode:", err);
+    // Fallback: stay in TEST mode
+    $testMode.prop("checked", true);
+    const settingsRef = doc(db, "settings", "newsletter");
+    attachTestModeHandler(settingsRef, $testMode);
+  }
+});
+
+function attachTestModeHandler(settingsRef, $testMode) {
+  $testMode.on("change", async function () {
+    const goingLive = !this.checked; // unchecked = LIVE
+
+    if (goingLive) {
+      const input = prompt(
+        "To go LIVE, type LIVE below to confirm:"
+      );
+
+      if (!input || input.trim() !== "LIVE") {
+        alert("Did not type LIVE — remaining in TEST mode.");
+        this.checked = true;
+        return;
+      }
+
+      alert("⚠️ TEST MODE DISABLED\nEmails will be sent LIVE.");
+    } else {
+      alert("✅ TEST MODE ENABLED\nEmails will be sent ONLY in test mode.");
+    }
+
+    const newTestMode = this.checked;
+
+    try {
+      await setDoc(
+        settingsRef,
+        { testMode: newTestMode },
+        { merge: true }
+      );
+      console.log("Newsletter testMode saved:", newTestMode);
+    } catch (err) {
+      console.error("Failed to save testMode:", err);
+      alert("Error saving test mode. Reverting.");
+      this.checked = !newTestMode;
+    }
+  });
+}
 
 function processTags(input) {
     let tagHTML = "";
@@ -1144,7 +1166,7 @@ async function loadNewsletters(filterTag = null) {
                                 <div>Title</div>
                                 <div>File name</div>
                                 <div>Upload Date</div>
-                                <div>Scheduled Date</div>
+                                <div>Release Date</div>
                             </div>
                         </div>
                         <div class="item_row">
@@ -1347,7 +1369,7 @@ $(document).on("click", ".push-newsletter-btn", async function () {
 
   // Decide mode from radio buttons
   //const mode = $("input[name='newsletter_send_mode']:checked").val() || "live";
-  const isTest = true;
+  const isTest = isNewsletterTestMode();
   const dedupeInTests = true;
 
 
@@ -1361,7 +1383,7 @@ $(document).on("click", ".push-newsletter-btn", async function () {
       .map(e => e.trim())
       .filter(Boolean);
     */
-    const testEmails = ["agarcia@nscds.org","artgarcia77@gmail.com","nicole@mcree-ed.consulting",
+    const testEmails = ["agarcia@nscds.org","artgarcia77@gmail.com",
         "web@mcree-ed.consulting"];
     if (!testEmails.length) {
       alert("Enter at least one test email.");
@@ -1369,6 +1391,7 @@ $(document).on("click", ".push-newsletter-btn", async function () {
     }
 
     options = { testEmails, dedupeInTests };
+
     confirmMsg =
       `Send TEST newsletter to:\n\n` +
       testEmails.join("\n") +
@@ -1669,6 +1692,11 @@ async function setSubscriberUnsubscribed(email, flag) {
   console.log("Unsubscribe flag updated for:", cleanEmail, "→", !!flag);
 }
 
+function isNewsletterTestMode() {
+  const el = document.getElementById("newsletter_test_mode");
+  return !!(el && el.checked);
+}
+
 // Toggle unsubscribed flag in Firestore when checkbox is changed
 $(document).on("change", ".subscriber-unsub-toggle", async function () {
   const email = $(this).data("email");
@@ -1698,6 +1726,84 @@ $(document).on("change", ".subscriber-unsub-toggle", async function () {
     this.checked = !flag;
   }
 });
+
+/*$("#newsletter_test_mode").on("change", function () {
+  if (!this.checked) {
+    const input = prompt(
+        `To go LIVE, type LIVE below to confirm:`
+    );
+
+    if (!input || input.trim() !== "LIVE") {
+        alert("Did not type LIVE — remaining in TEST mode.");
+        this.checked = true;
+        return;
+    }
+
+    alert("⚠️ TEST MODE DISENABLED\nEmails will be sent LIVE.");
+  }
+});*/
+
+async function getDeliveryReport(newsletterId, isTestMode = false) {
+  if (!newsletterId) {
+    throw new Error("Missing newsletterId");
+  }
+
+  const newsletterRef = doc(db, "newsletters_data", newsletterId);
+
+  // Make sure the newsletter exists (optional but nice)
+  const newsletterSnap = await getDoc(newsletterRef);
+  if (!newsletterSnap.exists()) {
+    throw new Error("Newsletter not found");
+  }
+
+  // 1) Recipients for this newsletter (live or test)
+  const recipientsCol = collection(
+    newsletterRef,
+    isTestMode ? "testRecipients" : "recipients"
+  );
+
+  const recipientsSnap = await getDocs(recipientsCol);
+  const receivedMap = new Map(); // email -> sentAt
+
+  recipientsSnap.forEach(docSnap => {
+    const d = docSnap.data() || {};
+    const email = (d.email || docSnap.id || "").toString().toLowerCase();
+    if (!email) return;
+    receivedMap.set(email, d.sentAt || null);
+  });
+
+  // 2) All subscribers from newsletters_email
+  const subsSnap = await getDocs(collection(db, "newsletters_email"));
+
+  const received = [];
+  const notReceived = [];
+  const unsubscribed = [];
+
+  subsSnap.forEach(docSnap => {
+    const d = docSnap.data() || {};
+    const email = (d.email || docSnap.id || "").toString().toLowerCase();
+    const name  = (d.name || "").toString();
+    if (!email) return;
+
+    if (d.unsubscribed === true) {
+      // keep separate so they don't show as "missed"
+      unsubscribed.push({ name, email });
+      return;
+    }
+
+    if (receivedMap.has(email)) {
+      received.push({
+        name,
+        email,
+        sentAt: receivedMap.get(email),
+      });
+    } else {
+      notReceived.push({ name, email });
+    }
+  });
+
+  return { received, notReceived, unsubscribed };
+}
 
 // ------------------------------
     // FILE HANDLING
