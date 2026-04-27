@@ -470,7 +470,7 @@ p:only-child {
     display: grid;
     gap: 1rem;
     /* Two columns: left auto-sized, right takes the rest */
-    grid-template-columns: 1.04fr .96fr;
+    grid-template-columns: 1.08fr .92fr;
     /* Two rows, auto-size by content (or fixed height if you prefer) */
     grid-template-rows: auto auto;
 

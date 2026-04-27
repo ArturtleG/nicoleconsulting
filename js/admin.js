@@ -1567,7 +1567,7 @@ async function pushNewsletter(newsletterId, options = {}) {
     createdCount++;
 
     const namePart = sub.name ? ` ${sub.name}` : "";
-    const greeting = sub.name ? `Hi ${sub.name},` : "Hi there,";
+    const greeting = "Hi,"; //sub.name ? `Hi ${sub.name},` : "Hi,";
 
     const subject = `Roots & Reason - ${title}`;
 
@@ -1576,7 +1576,7 @@ async function pushNewsletter(newsletterId, options = {}) {
 
     const footerHtml = `
       <p style="font-size:12px; color:#555; margin-top:16px;">
-        You’re receiving this email because you signed up for the Roots &amp; Reason newsletter
+        You're receiving this email because you signed up for the Roots &amp; Reason newsletter
         at mcree-ed.consulting. If you no longer wish to receive these emails,
         you can <a href="mailto:${unsubscribeEmail}?subject=Unsubscribe%20Roots%20%26%20Reason">
         unsubscribe by email</a>.
@@ -1588,7 +1588,7 @@ async function pushNewsletter(newsletterId, options = {}) {
 
     const footerText = `
         ---
-        You’re receiving this email because you signed up for the Roots & Reason newsletter
+        You're receiving this email because you signed up for the Roots & Reason newsletter
         at mcree-ed.consulting. If you no longer wish to receive these emails, you can
         unsubscribe by emailing ${unsubscribeEmail} with "Unsubscribe Roots & Reason"
         in the subject line.
@@ -1601,7 +1601,7 @@ async function pushNewsletter(newsletterId, options = {}) {
     const htmlBody = `
       <p>${greeting}</p>
       ${noteHtml}
-      <p>You can view the newsletter here:</p>
+      <p>Enjoy the Roots and Reason Newsletter below:</p>
       <p><a href="${url}">${filename}</a></p>
       <p>— Nicole</p>
       <hr />
